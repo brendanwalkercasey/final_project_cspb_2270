@@ -1,0 +1,5 @@
+Compile Command (with flags):
+g++ -std=c++11 -o wavelet_compress main.cpp -ltiff
+
+Run Executable:
+./wavelet_compress <input.tif>.  (e.g. ./wavelet_compress board.tif)

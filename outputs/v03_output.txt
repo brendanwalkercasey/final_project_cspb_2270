@@ -1,0 +1,4 @@
+brendan@Brendans-MacBook-Pro working % g++ -std=c++11 -o wavelet_compress test_libtiff_v03.cpp -ltiff
+brendan@Brendans-MacBook-Pro working % ./wavelet_compress                                            
+TIFFOpen: input.tif: No such file or directory.
+Could not open TIFF file!

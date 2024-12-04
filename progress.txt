@@ -1,0 +1,50 @@
+Steps Taken/Abandoned:
+	Opencv 
+		required several dependencies:
+
+			Package managers:
+
+				- Homebrew package manager (decided not to use - see https://saagarjha.com/blog/2019/04/26/thoughts-on-macos-package-managers/)
+				- Macports package manager (decided not to use - see above, requires a lot of manual configurations I think?)
+
+			General Dependencies from downloading from source:
+
+				- pkg-config 
+					- when i ran pkg-config --modversion opencv4, my terminal returned zsh: command not found: pkg-config
+				- pkg-config required glib which depending on the version downloaded, could not run ./confgure, and instead required meson
+
+			Issues downloading from pre-compiled binaries:
+				- opencv pre-compiled binaries wouldn't link to my test_opencv.cpp code (test code for reading an image)
+	Compilation Errors:
+
+		#define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (so this is uneccessary)
+		
+Steps Taken/Pursued:
+
+	Grayscale transform: 
+		(Brendan note: Do I need grayscale transform??? i.e. does this make encoding easier instead of rgba/argb channels?  Or will I need to decode back to rgba/argb?)
+	LibTIFF:
+		Used primarily to read/write TIFF (to/from temp buffer)and make necessary conversions with built in functions
+		Settled on Libtiff library because I can convert to grayscale measurements using bit shifting with the luminance method (i.e. 0.299 * R + 0.587 * G + 0.114 * B)
+	Wavelet Transform:
+		Haar as a default, but would like to impliment something more complex (Haar, Daubechies, Coiflets, Symlets, etc.)
+		Mexican Hat (worked)
+    	Daubechies == too computationally complex (run-time etc.)?
+Syntax changes:
+
+	used #define to re-assign std::uint32_t types to "u32" (reduce space)
+
+
+Issues (Ongoing):
+	Output:
+		test_libtiff_v03 runs successfully...but I cant seem to open output tiff.
+	Decode:
+		Do I need this to see output tiff? Do I need to input the encoded output tiff?
+
+Resources:
+http://bearcave.com/software/java/wavelets/daubechies/index.html
+http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
+https://wavelet2d.sourceforge.net/ (...just a library, not really helping me build the wavelet transform)
+https://pywavelets.readthedocs.io/en/latest/ref/wavelets.html
+https://graphics.stanford.edu/wikis/cs148-07/Assignment7
+https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf (Texas A&M lecture)
