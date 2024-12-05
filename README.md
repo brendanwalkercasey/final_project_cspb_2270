@@ -9,6 +9,8 @@ In simple terms, it’s akin to applying a filter to the image at different scal
 
 ## Details:
 - Project data structure implemented:
+    - tree (for encoding)
+    - bit shifting (for grayscale conversion)
 - Short explanation of the data structure:
 - How to run code:
 - Write up:
