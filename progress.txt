@@ -41,6 +41,16 @@ Issues (Ongoing):
 	Decode:
 		Do I need this to see output tiff? Do I need to input the encoded output tiff?
 
+
+
+******** To-Do *************
+
+- new tiff (grayscale)
+- add inverse transform to v02 (save as new version)
+
+
+****************************
+
 Resources:
 http://bearcave.com/software/java/wavelets/daubechies/index.html
 http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
@@ -48,3 +58,4 @@ https://wavelet2d.sourceforge.net/ (...just a library, not really helping me bui
 https://pywavelets.readthedocs.io/en/latest/ref/wavelets.html
 https://graphics.stanford.edu/wikis/cs148-07/Assignment7
 https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf (Texas A&M lecture)
+https://people.math.sc.edu/Burkardt/data/tif/tif.html (example tiff files)
