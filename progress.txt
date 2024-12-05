@@ -47,6 +47,7 @@ Issues (Ongoing):
 
 - new tiff (grayscale)
 - add inverse transform to v02 (save as new version)
+- create makefile for cleaner execution
 
 
 ****************************
