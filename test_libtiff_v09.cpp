@@ -10,11 +10,20 @@
 using namespace std;
 
 /* 
+********************************
 Differences between v08 and v09:
+********************************
 - Inverse Wavelet Code:
     The inverse Daubechies-4 transform requires a different set of filter coefficients, 
     which are the inverse of the forward coefficients. For Daubechies-4, these are derived 
-    from the original h0, h1, h2, h3 and g0, g1, g2, g3.
+    from the original h0, h1, h2, h3 and g0, g1, g2, g3. 
+
+*******************
+Decompostion steps:
+*******************
+    A. Wavelet Decomposition with Daubechies-4 (Db4)
+    B. Decomposition into 4 Sub-bands
+    C. Post-decomposition
 
 */
 
@@ -37,6 +46,15 @@ void readTiffImage(const char* filename, vector<u8>& buffer, u32& width, u32& he
 
     TIFFClose(tiff);
 }
+
+/*
+A. Wavelet Decomposition with Daubechies-4 (Db4):
+    The Daubechies-4 filter is used for the 2D wavelet transform. The decomposition into sub-bands happens in two steps: applying the wavelet transform to the rows and then to the columns.
+
+    Low-pass filter (h0, h1, h2, h3) and high-pass filter (g0, g1, g2, g3) are defined.
+    For each row, the daubechies1D function is called, which applies the Daubechies-4 filter (low-pass and high-pass) to the data. After processing, the data is split into two parts: one containing low frequencies and the other containing high frequencies.
+    The same process happens for each column in the daubechies2D function, further splitting the image into frequency bands.
+*/
 
 // Daubechies-4 low-pass and high-pass filter coefficients
 const float h0 = (1 + sqrt(3)) / (4 * sqrt(2));
@@ -72,6 +90,14 @@ void daubechies1D(vector<float>& data) {
         data[i] = temp[i];
     }
 }
+
+/*
+B. The 2D wavelet decomposition results in four sub-bands (LL, LH, HL, HH):
+    LL (Low-Low): Low frequency in both the rows and columns (approximation of the original image).
+    LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
+    HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
+    HH (High-High): High frequency in both rows and columns (diagonal detail).
+*/
 
 // 2D Daubechies-4 Transform: Apply 1D transform on rows and columns
 void daubechies2D(vector<vector<float>>& image) {
@@ -114,6 +140,15 @@ void waveletTransform(vector<u8>& buffer, u32 width, u32 height, double sigma) {
 
     // Apply the 2D Daubechies transform
     daubechies2D(image);
+
+    /*
+    C. Post-decomposition:
+        Within this wavelet transform function, after applying the 2D Daubechies-4 transform, 
+        the code normalizes the resulting matrix back to 8-bit values and writes it to an output 
+        file. If you wanted to explicitly extract and save these 4 sub-bands (LL, LH, HL, HH), 
+        you would need to modify the code to store and save these parts separately after the 
+        wavelet transform.
+    */
 
     // Convert back to 1D buffer
     for (u32 row = 0; row < height; row++) {
@@ -227,6 +262,19 @@ void inverseWaveletTransform(vector<u8>& buffer, u32 width, u32 height) {
 }
 
 int main() {
+
+// ***********************
+// Summary of the Process:
+// ***********************
+// 1) Read the TIFF Image: The image is read into a buffer (1D vector) and its dimensions are retrieved.
+// 2) Apply Wavelet Transform (Data Transformation):
+//    2a) Convert to Numeric Data: The 1D buffer is converted to a 2D array (image) of float values for the wavelet transform.
+//    2b) Apply Wavelet Transform: The 2D Daubechies wavelet transform is applied in both row and column directions.
+// 3) Write the Transformed TIFF File: The transformed image data is saved to a new TIFF file (using LZW compression).
+// 4) Post-process and Normalize: The transformed data is normalized back to the 0-255 range and saved as an 8-bit TIFF image.
+//    (This step also includes inverse wavelet transformation for reconstruction, which is optional but demonstrated.)
+
+
     const char* inputFile = "cameraman.tif";
     const char* outputFile = "output_compressed.tif";
 

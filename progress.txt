@@ -47,18 +47,28 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
+- how to save my decomposed parts of the Daubechies transform?
+- create makefile for cleaner execution?
+
 [done] new tiff (grayscale)
-- add inverse transform to v02 (save as new version)
-- incorperate the "example_daubechies.cpp" into my v07 code (and what part is actually creating the four sub-bands of decomposition?)
-- how to make a tree structure for encoding? (like my huffman hw)
-- which part of my code is quantized
-- can I use a daubechies wavelet in lieu of Haar
+    - wanted to keep my project inputs simple (1 band) to focus on the wavlet tranform, compression, encoding and decoding process.
+[done] add inverse transform to v02 (save as new version)
+    - wanted to de-compress my result to see the change (and highlight the effectiveness of compression/pixel data saving)
+[done] incorperate the "example_daubechies.cpp" into my v07 code (and what part is actually creating the four sub-bands of decomposition?)
+    - wanted to explicity see how decomposition process was happening by splitting the process by decomposed bands and saved into tangible results
+[not done] how to make a tree structure for encoding? (like my huffman hw) 
+	- *** cool, but not enough time, see huffman_encode_example.cpp ***
+[done] which part of my code is quantized
+	- Wavelet compression involves transforming the image using the Daubechies-4 wavelet.  The "quantization" occurs during the conversion of the transformed floating-point values back to 8-bit values.
+	  This is "normalization", and is an important step in your code because the wavelet transform produces floating-point values that (often) lie outside the 8-bit integer range (0-255).  As such you need to scale values to fit this range for display or storage.
+	  Quantization errors are inherent in the process because we are essentially rounding (or "mapping") continuous data to discrete set of 8-bit values (0-255). Note: This is common in image compression techniques.
+	  Ultimately, quantization occurs during normalization process where continuous values (i.e. floating-point) are mapped to discrete range of 0 to 255, to store the result in an 8-bit format (u8). This process occurs for both the wavelet transform and wavelet inverse.
+[done] can I use a daubechies wavelet in lieu of Haar?
     (i.e. how to do this process with my current code:
     1) Read the TIFF Image: You need to read the TIFF image file into a suitable data structure (e.g., a matrix or 2D vector).
     2) Convert to Numeric Data: Convert the pixel data into a 2D array or vector of floating-point values, depending on your image data type (grayscale, color, etc.).
     3) Apply Wavelet Transform: Apply the Daubechies wavelet transform to the 2D array (matrix).
     4) Post-process and Encode: After transformation, you would typically quantize, encode, and possibly write the compressed result to a new file.
-- create makefile for cleaner execution
 
 
 ****************************
