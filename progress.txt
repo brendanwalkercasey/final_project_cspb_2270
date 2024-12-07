@@ -47,7 +47,7 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
-- new tiff (grayscale)
+[done] new tiff (grayscale)
 - add inverse transform to v02 (save as new version)
 - incorperate the "example_daubechies.cpp" into my v07 code (and what part is actually creating the four sub-bands of decomposition?)
 - how to make a tree structure for encoding? (like my huffman hw)
