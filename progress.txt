@@ -47,6 +47,8 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
+- how to embed images into readme
+- organize write up (with analysis, results, future development, etc.)
 - how to save my decomposed parts of the Daubechies transform?
 - create makefile for cleaner execution?
 

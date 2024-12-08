@@ -51,6 +51,8 @@ Functions:
 ## How to run code:
 ## Write up:
 
+Description:
+
 This code performes the following:
 
 1) Wavelet Decomposition (Daubechies-4):
@@ -72,4 +74,7 @@ This project makes use of Bit-Shifting Quantization:
 3) Compression:
     - Compression: After the wavelet transform is applied, quantization is performed on the transformed coefficients, and then normalization of the data back to the 0-255 range (suitable for image storage).
     - Reconstruction: inverseWaveletTransform() function inversely transforms the image, reconstructing it from the quantized coefficients. This step involves reversing the wavelet transform.  After applying the inverse transform, the image is reconstructed and written to a new TIFF file.  This technique results in some loss of image quality due to the quantization.
+
+
+## Analysis
 
