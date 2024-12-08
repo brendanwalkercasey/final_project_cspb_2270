@@ -47,11 +47,18 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
+- experiment with bit shift amount? 
+- add threshold code?
+- experiment with threshold amount?
+- use/remove sigma
 - how to embed images into readme
 - organize write up (with analysis, results, future development, etc.)
+
+***[extra]***
 - how to save my decomposed parts of the Daubechies transform?
 - create makefile for cleaner execution?
 
+***[done]***
 [done] new tiff (grayscale)
     - wanted to keep my project inputs simple (1 band) to focus on the wavlet tranform, compression, encoding and decoding process.
 [done] add inverse transform to v02 (save as new version)
