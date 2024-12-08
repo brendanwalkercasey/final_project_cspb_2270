@@ -57,6 +57,7 @@ Issues (Ongoing):
 ***[extra]***
 - how to save my decomposed parts of the Daubechies transform?
 - create makefile for cleaner execution?
+- separate into h-file and individual cpp files?
 
 ***[done]***
 [done] new tiff (grayscale)
