@@ -31,7 +31,7 @@ Using a set of functions, and variables, this process performs the following:
 Variables:
 
     Wavelet Decomposition with Daubechies-4 (using low/high pass filters):
-        
+    
         The Daubechies-4 filter is used for the 2D wavelet transform. The decomposition into sub-bands happens in two steps: applying the wavelet transform to the rows and then to the columns:
 
         Low-pass filter (h0, h1, h2, h3)
@@ -54,15 +54,15 @@ Functions:
 This code performes the following:
 
 1) Wavelet Decomposition (Daubechies-4):
- - A Daubechies-4 (Db4) wavelet transform, which decomposes the image into frequency components (low and high frequencies) at multiple scales.
- - The forward transform is performed in two steps:
-        Row-wise: The 1D Daubechies-4 transform is applied to each row.
-        Column-wise: The same transform is applied to each column of the image.
-- This step decomposes the image into four sub-bands:
-        LL (Low-Low): Low frequency in both rows and columns.
-        LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
-        HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
-        HH (High-High): High frequency in both rows and columns (diagonal detail).
+    - A Daubechies-4 (Db4) wavelet transform, which decomposes the image into frequency components (low and high frequencies) at multiple scales.
+    - The forward transform is performed in two steps:
+        - Row-wise: The 1D Daubechies-4 transform is applied to each row.
+        - Column-wise: The same transform is applied to each column of the image.
+    - This step decomposes the image into four sub-bands:   
+        - LL (Low-Low): Low frequency in both rows and columns.
+        - LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
+        - HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
+        - HH (High-High): High frequency in both rows and columns (diagonal detail).
 
 2) Quantization:
 This project makes use of Bit-Shifting Quantization: 
