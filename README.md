@@ -15,10 +15,17 @@ In simple terms, it’s akin to applying a filter to the image at different scal
 
 Using a set of functions, and variables, this process performs the following:
 
-1) Read the TIFF Image: The image is read into a buffer (1D vector) and its dimensions are retrieved.
-2) Convert to Numeric Data: The 1D buffer is converted to a 2D array (image) of float values for wavelet transform.
-3) Apply Wavelet Transform: The 2D Daubechies wavelet transform is applied in both row and column directions.
-4) Post-process and Encode: The transformed data is normalized back to the 0-255 range and saved as a new TIFF image using LZW compression.
+1) Read the TIFF image into a buffer: The image is read into a buffer (1D vector) and its dimensions are retrieved.
+2) Apply wavelet compression (including the Daubechies transform and quantization).
+    2 a) Convert to Numeric Data: The 1D buffer is converted to a 2D array (image) of float values for wavelet transform.
+    2 b) Apply Wavelet Transform: The 2D Daubechies wavelet transform is applied in both row and column directions.
+3) Write the compressed image to a new TIFF file.
+4) Post-process and Encode: 
+    4 a) The transformed data is normalized back to the 0-255 range and saved as a new TIFF image using LZW compression.
+    4 b) Reconstruct the image using the inverse wavelet transform.
+    4 c) Write the reconstructed image to a new file.
+
+
 
 
 Variables:
@@ -41,7 +48,28 @@ Functions:
     readTiffImage():
         This function opens a TIFF file, retrieves image dimensions (width and height), as well as the total number of samples per pixel (samples_per_pixel), and reads the pixel data into a buffer (a 1D vector). Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
     
-- How to run code:
-- Write up:
+## How to run code:
+## Write up:
 
+This code performes the following:
+
+1) Wavelet Decomposition (Daubechies-4):
+ - A Daubechies-4 (Db4) wavelet transform, which decomposes the image into frequency components (low and high frequencies) at multiple scales.
+ - The forward transform is performed in two steps:
+        Row-wise: The 1D Daubechies-4 transform is applied to each row.
+        Column-wise: The same transform is applied to each column of the image.
+- This step decomposes the image into four sub-bands:
+        LL (Low-Low): Low frequency in both rows and columns.
+        LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
+        HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
+        HH (High-High): High frequency in both rows and columns (diagonal detail).
+
+2) Quantization:
+This project makes use of Bit-Shifting Quantization: 
+    - In the applyBitShiftingQuantization() function, quantization is applied by shifting the wavelet coefficients. The goal is reduced precision for each applicable coefficient (through right-shifting), which helps in reduce the size of the data (thus, achieving compression). This technique is a form of lossy compression, which discards less significant information (small coefficients) and keeps the more important ones (large coefficents).
+
+
+3) Compression:
+    - Compression: After the wavelet transform is applied, quantization is performed on the transformed coefficients, and then normalization of the data back to the 0-255 range (suitable for image storage).
+    - Reconstruction: inverseWaveletTransform() function inversely transforms the image, reconstructing it from the quantized coefficients. This step involves reversing the wavelet transform.  After applying the inverse transform, the image is reconstructed and written to a new TIFF file.  This technique results in some loss of image quality due to the quantization.
 
