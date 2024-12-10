@@ -40,7 +40,27 @@ Variables:
         For each row, the daubechies1D function is called, which applies the Daubechies-4 filter (low-pass and high-pass) to the data. After processing, the data is split into two parts: 1) low frequencies and 2) high frequencies.
         The same process happens for every column in the daubechies2D function, further splitting the image into frequency bands.
 
-        [more needed, tbd]
+    Saving Daubechies-4 to separate files: 
+
+        Initialize minVal and maxVal: The main reason for using constants is for defining initial extremes for the minVal and maxVal variables. When starting with largest possible, and smallest possible float values, we ensure that every value in the collection will either be smaller than FLT_MAX (updating minVal) or larger than -FLT_MAX (updating maxVal).
+
+            - "minVal" = initialized to FLT_MAX, which is the largest possible value that can be represented by a float. Any number in the matrix will be smaller than this value, so minVal will be updated to the first value in the matrix. 
+            - "maxVal" = initialized to -FLT_MAX, the smallest possible value. Any number in the matrix will be larger than this value, so maxVal will be updated to the first value in the matrix.
+            
+        Iterate through the 2D array:
+            - The outer loop iterates over each row in the matrix
+            - The inner loop iterates over each value in the row
+            - For each value, code checks if its smaller than minVal or larger than maxVal (If either condition == true,  minVal or maxVal are updated accordingly.
+        Output:
+            After iteration through all values in matrix:
+                - minVal contains the smallest value, and maxVal contains the largest value in the matrix.
+        
+
+        This technique is commonly used when you want to scan through a collection and find the min and max values without making any assumptions about the values in the collection.
+        
+[more needed, tbd]
+
+    
 
 
 Functions:
@@ -53,27 +73,27 @@ Functions:
 
 Description:
 
-This code performes the following:
+    This code performes the following:
 
-1) Wavelet Decomposition (Daubechies-4):
-    - A Daubechies-4 (Db4) wavelet transform, which decomposes the image into frequency components (low and high frequencies) at multiple scales.
-    - The forward transform is performed in two steps:
-        - Row-wise: The 1D Daubechies-4 transform is applied to each row.
-        - Column-wise: The same transform is applied to each column of the image.
-    - This step decomposes the image into four sub-bands:   
-        - LL (Low-Low): Low frequency in both rows and columns.
-        - LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
-        - HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
-        - HH (High-High): High frequency in both rows and columns (diagonal detail).
+    1) Wavelet Decomposition (Daubechies-4):
+        - A Daubechies-4 (Db4) wavelet transform, which decomposes the image into frequency components (low and high frequencies) at multiple scales.
+        - The forward transform is performed in two steps:
+            - Row-wise: The 1D Daubechies-4 transform is applied to each row.
+            - Column-wise: The same transform is applied to each column of the image.
+        - This step decomposes the image into four sub-bands:   
+            - LL (Low-Low): Low frequency in both rows and columns.
+            - LH (Low-High): Low frequency in rows, high frequency in columns (horizontal detail).
+            - HL (High-Low): High frequency in rows, low frequency in columns (vertical detail).
+            - HH (High-High): High frequency in both rows and columns (diagonal detail).
 
-2) Quantization:
-This project makes use of Bit-Shifting Quantization: 
-    - In the applyBitShiftingQuantization() function, quantization is applied by shifting the wavelet coefficients. The goal is reduced precision for each applicable coefficient (through right-shifting), which helps in reduce the size of the data (thus, achieving compression). This technique is a form of lossy compression, which discards less significant information (small coefficients) and keeps the more important ones (large coefficents).
+    2) Quantization:
+    This project makes use of Bit-Shifting Quantization: 
+        - In the applyBitShiftingQuantization() function, quantization is applied by shifting the wavelet coefficients. The goal is reduced precision for each applicable coefficient (through right-shifting), which helps in reduce the size of the data (thus, achieving compression). This technique is a form of lossy compression, which discards less significant information (small coefficients) and keeps the more important ones (large coefficents).
 
 
-3) Compression:
-    - Compression: After the wavelet transform is applied, quantization is performed on the transformed coefficients, and then normalization of the data back to the 0-255 range (suitable for image storage).
-    - Reconstruction: inverseWaveletTransform() function inversely transforms the image, reconstructing it from the quantized coefficients. This step involves reversing the wavelet transform.  After applying the inverse transform, the image is reconstructed and written to a new TIFF file.  This technique results in some loss of image quality due to the quantization.
+    3) Compression:
+        - Compression: After the wavelet transform is applied, quantization is performed on the transformed coefficients, and then normalization of the data back to the 0-255 range (suitable for image storage).
+        - Reconstruction: inverseWaveletTransform() function inversely transforms the image, reconstructing it from the quantized coefficients. This step involves reversing the wavelet transform.  After applying the inverse transform, the image is reconstructed and written to a new TIFF file.  This technique results in some loss of image quality due to the quantization.
 
 
 ## Analysis
