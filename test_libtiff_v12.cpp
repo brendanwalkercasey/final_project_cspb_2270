@@ -15,7 +15,7 @@ using namespace std;
 Differences between v11 and v12:
 ********************************
 - refactored applyBitShiftingQuantization() to add thresholding (using sigma value)
-- added Daubechies transform 4 sub-band tiffs (added daubechies2DWithSubbands(), and writeSubbandToTiff())
+- added Daubechies transform 4 sub-band tiffs (added daubechies2DWithSubbands(), and writeSubbandToTiff(), and updated main())
 */
 
 // Function to read the TIFF image into a buffer
