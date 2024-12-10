@@ -90,17 +90,17 @@ The bitShiftAmount is used for applying bit-shifting quantization, which reduces
 
 As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compression, but at the cost of reduced image quality due to more aggressive quantization. This can lead to a noticeable loss of detail, particularly in areas with fine textures or smooth gradients. On the other hand, lower bitShiftAmount values (e.g., 1 or 2) preserve more detail but achieve less compression. While this may not significantly reduce data storage, it still offers some level of quantization to decrease file size.  This can be demonstrated below:
 
-bitShiftAmount = 1, or 2 (Light Compression: preserve image quality while still reducing the file size, useful for noise reduction)
+    - bitShiftAmount = 1, or 2 (Light Compression: preserve image quality while still reducing the file size, useful for noise reduction)
 
 ![Image](images/v11_shift2_output_compressed.tif)
 
 ![Image](images/v11_shift2_output_recosntructed.tif)
 
-bitShiftAmount = 3 (Moderate Compression: balances file size and image quality)
+    - bitShiftAmount = 3 (Moderate Compression: balances file size and image quality)
 
 ![Image](images/v11_shift3_output_compressed.tif)
 
 ![Image](images/v11_shift3_output_recosntructed.tif)
 
-bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
+    - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
