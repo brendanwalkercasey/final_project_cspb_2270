@@ -81,7 +81,7 @@ This project makes use of Bit-Shifting Quantization:
 Bit Shift Values:
 The bitShiftAmount is used for applying bit-shifting quantization, which reduces the precision of image data by right-shifting the pixel values. This shift effectively narrows the range of pixel values, making it useful for compression by reducing the amount of data required to represent the image. As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compression, but at the cost of reduced image quality due to more aggressive quantization. This can lead to a noticeable loss of detail, particularly in areas with fine textures or smooth gradients. On the other hand, lower bitShiftAmount values (e.g., 1 or 2) preserve more detail but achieve less compression. While this may not significantly reduce data storage, it still offers some level of quantization to decrease file size.  This can be demonstrated below:
 
-![Example Image](images/v11_shift2_output_compressed.tif)
+![Image](images/v11_shift2_output_compressed.tif)
 
 bitShiftAmount = 1, or 2 (Light Compression: preserve image quality while still reducing the file size, useful for noise reduction)
     - bitShiftAmount = 3 (Moderate Compression: balances file size and image quality)
