@@ -241,12 +241,12 @@ void inverseWaveletTransform(vector<u8>& buffer, u32 width, u32 height) {
 
 int main() {
     const char* inputFile = "cameraman.tif";
-    const char* outputFile = "output_compressed.tif";
+    const char* outputFile = "v11_shift2_output_compressed.tif";
 
     u32 width, height;
     u16 samples_per_pixel = 1;
     double sigma = 42; // Example sigma, change as needed
-    int bitShiftAmount = 3;  // Example: shift by 3 bits (divide by 8)
+    int bitShiftAmount = 2;  // Example: shift by 2 bits (divide by 8)
     vector<u8> buffer;
 
     // Step 1: Read the TIFF image
@@ -262,7 +262,7 @@ int main() {
     inverseWaveletTransform(buffer, width, height);
 
     // Optional: Save the reconstructed image to a new file
-    const char* outputReconstructedFile = "output_reconstructed.tif";
+    const char* outputReconstructedFile = "v11_shift2_output_reconstructed.tif";
     writeTiffImage(outputReconstructedFile, buffer, width, height, samples_per_pixel);
 
     cout << "Wavelet compression with bit-shifting quantization and reconstruction completed!" << endl;

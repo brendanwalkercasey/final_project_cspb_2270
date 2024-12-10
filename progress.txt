@@ -47,11 +47,10 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
-- experiment with bit shift amount? 
 - add threshold code?
 - experiment with threshold amount?
 - use/remove sigma
-- how to embed images into readme
+- how to embbed images into readme
 - organize write up (with analysis, results, future development, etc.)
 
 ***[extra]***
@@ -79,6 +78,8 @@ Issues (Ongoing):
     2) Convert to Numeric Data: Convert the pixel data into a 2D array or vector of floating-point values, depending on your image data type (grayscale, color, etc.).
     3) Apply Wavelet Transform: Apply the Daubechies wavelet transform to the 2D array (matrix).
     4) Post-process and Encode: After transformation, you would typically quantize, encode, and possibly write the compressed result to a new file.
+[done] experiment with bit shift amount? 
+	added different amounts, and added discussion in README->Analysis
 
 
 ****************************
