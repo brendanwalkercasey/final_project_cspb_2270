@@ -8,7 +8,7 @@ Run Executable:
 
 ****************************** Working instructions ******************************
 Compile Command (with flags):
-g++ -std=c++17 -o wavelet_compress test_libtiff_v11.cpp -ltiff
+g++ -std=c++17 -o wavelet_compress test_libtiff_v12.cpp -ltiff
 
 Run Executable:
 ./wavelet_compress

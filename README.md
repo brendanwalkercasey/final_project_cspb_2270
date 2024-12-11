@@ -7,26 +7,45 @@ Wavelet compression is a popular method for image compression, which leverages w
 
 In simple terms, it’s akin to applying a filter to the image at different scales, allowing you to see both coarse and fine details in the image. By representing the image in terms of wavelet coefficients, we can selectively retain the most significant information while discarding less important data.
 
+This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an image into frequency components, bit-shifting quantization: to quantize large values, while smaller coefficients are thresholded out with a sigma value, an inverse wavelet transform: to reconstruct the image from its compressed components, and built-in methods (from libTIFF library) to encode the image after quantization (with Limpel-Ziv-Welch, or LZW Compression).  
+
+
 ## Details:
-- Project data structure implemented:
-    - tree (for encoding)
-    - bit shifting (for grayscale conversion)
-- Short explanation of the data structure:
-
-Using a set of functions, and variables, this process performs the following:
-
-1) Read the TIFF image into a buffer: The image is read into a buffer (1D vector) and its dimensions are retrieved.
-2) Apply wavelet compression (including the Daubechies transform and quantization).
-    2 a) Convert to Numeric Data: The 1D buffer is converted to a 2D array (image) of float values for wavelet transform.
-    2 b) Apply Wavelet Transform: The 2D Daubechies wavelet transform is applied in both row and column directions.
-3) Write the compressed image to a new TIFF file.
-4) Post-process and Encode: 
-    4 a) The transformed data is normalized back to the 0-255 range and saved as a new TIFF image using LZW compression.
-    4 b) Reconstruct the image using the inverse wavelet transform.
-    4 c) Write the reconstructed image to a new file.
+Data structures and techniques implemented:
+    - Vectors (main base structure for storing image data, in the form of 1-D and 2-D arrays, typically with 8-bit, 16-bit, unsigned integers, or float types)
+    - Buffers (temporary structures used during 2D Daubechies tranform to store intermediate results)
+    - Pointers (namely pointers to TIFF objects, to interact with the libTIFF library in a memory efficent manner)
+    - Standard Library Algorithms (standard built-in methods to better organize code, and save time e.g. min_element and max_element for finding min/max values)
+    - Bit-Shifting (simple and fast operations with minimal computations to reduce data on individual pixel values, effectively compressing image file with fewer bits)
 
 
-
+Using a set of functions, and variables, this code performs the following:
+    1) Read the TIFF Image into a Buffer:
+        Action: The image is read into a buffer (vector<u8>), where each pixel is stored as a grayscale value (an 8-bit unsigned integer).
+        Details: The image's dimensions (width, height) and the number of samples per pixel (e.g., grayscale = 1) are retrieved from the TIFF metadata.
+    2) Apply Wavelet Compression (Daubechies-4 Transform):
+        2a) Convert to Numeric Data:
+            - The 1D buffer (which holds pixel values) is converted to a 2D matrix (vector<vector<float>>) where each value is a floating-point representation of the pixel. This conversion is necessary for performing the wavelet transformation.
+        2b) Apply Wavelet Transform:
+            - The 2D Daubechies-4 wavelet transform is applied to the image in two steps:
+                1) 1D transform is applied to each row of the image.
+                2) 1D transform is applied to each column of the image.
+    3) Quantization:
+        Action: The wavelet coefficients are quantized using bit-shifting. This process reduces the precision of the coefficients for compression.
+        Details: Small coefficients are thresholded to zero based on a sigma value (applyBitShiftingQuantization()). Larger coefficients are shifted by a specified amount (e.g., by 2 bits), which reduces their range and thus compresses the data.
+    4) Reconstruction (Inverse Wavelet Transform):
+        Action: The inverse Daubechies-4 wavelet transform is applied to reconstruct the image from its wavelet sub-bands.
+        Details: The image is reconstructed by applying the inverse wavelet transform (first on columns, then on rows), reversing the effect of the initial wavelet transform.
+    5) Post-process and Encode:
+        5a) Normalize the Data: The transformed image data is normalized back to the 0-255 grayscale range for proper display. This normalization ensures that the pixel values fit within the standard 8-bit range.
+        5b) Save the Processed Image: The compressed (and potentially quantized) image is saved to a new TIFF file using LZW compression for file size reduction.5c) Reconstruct and Save the Image: The image is reconstructed using the inverse wavelet transform (as described earlier) and then saved to another TIFF file as the "reconstructed" version.
+    6) Additional Steps: 
+        - Sub-Band Decomposition: After applying the wavelet transform, four sub-bands are created to illustrate details of directional components of the image:
+            - LL (approximation) (visible in top left of compressed output tiff)
+            - LH (horizontal details) (visible in bottom left of compressed output tiff)
+            - HL (vertical details) (visible in top right of compressed output tiff)
+            - HH (diagonal details) (visible in bottom right of compressed output tiff)
+        While these details are visible in the compressed file (see list above), the code for generating individual output tiff files (e.g. LL tiff, or HH tiff) did not correctly split and resize the original compressed output image.  Therefore, generating individual tiff files for each sub-band was left as optional under the main() function.  
 
 Variables:
 
@@ -57,16 +76,17 @@ Variables:
         
 
         This technique is commonly used when you want to scan through a collection and find the min and max values without making any assumptions about the values in the collection.
-        
-[more needed, tbd]
 
-    
 
 
 Functions:
 
     readTiffImage():
         This function opens a TIFF file, retrieves image dimensions (width and height), as well as the total number of samples per pixel (samples_per_pixel), and reads the pixel data into a buffer (a 1D vector). Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
+    
+    Lempel-Ziv-Weltch (built-in algorithm for lossless tranforms):
+        - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
+    
     
 ## How to run code:
 ## Write up:
@@ -124,3 +144,11 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
 
     - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
+
+## Project revisions, and Future Development
+Original thought: 
+- Project data structure implemented:
+    - Huffman tree or SPIHT tree (for encoding) (too much time considering the project scope)
+    - bit shifting (for grayscale conversion) (wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition, but went down rabbit hole of ARGB vs RGBA and also fell outside of main project scope)
+        
+[more needed, tbd]
