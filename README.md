@@ -12,10 +12,15 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
 
 ## Details:
 Data structures and techniques implemented:
+
     - Vectors (main base structure for storing image data, in the form of 1-D and 2-D arrays, typically with 8-bit, 16-bit, unsigned integers, or float types)
+
     - Buffers (temporary structures used during 2D Daubechies tranform to store intermediate results)
+
     - Pointers (namely pointers to TIFF objects, to interact with the libTIFF library in a memory efficent manner)
+
     - Standard Library Algorithms (standard built-in methods to better organize code, and save time e.g. min_element and max_element for finding min/max values)
+    
     - Bit-Shifting (simple and fast operations with minimal computations to reduce data on individual pixel values, effectively compressing image file with fewer bits)
 
 
