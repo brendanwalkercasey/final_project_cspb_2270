@@ -13,3 +13,11 @@ g++ -std=c++17 -o wavelet_compress test_libtiff_v12.cpp -ltiff
 Run Executable:
 ./wavelet_compress
 **********************************************************************************
+
+******************************* Final instructions *******************************
+Compile Command (with flags):
+g++ -std=c++17 -o wavelet_compress wavelet_compression.cpp -ltiff
+
+Run Executable:
+./wavelet_compress
+**********************************************************************************

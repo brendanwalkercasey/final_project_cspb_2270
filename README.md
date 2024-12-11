@@ -49,7 +49,9 @@ Using a set of functions, and variables, this code performs the following:
 
         Action: The wavelet coefficients are quantized using bit-shifting. This process reduces the precision of the coefficients for compression.
 
-        Details: Small coefficients are thresholded to zero based on a sigma value (applyBitShiftingQuantization()). Larger coefficients are shifted by a specified amount (e.g., by 2 bits), which reduces their range and thus compresses the data.
+        Details: Small coefficients are thresholded to zero based on a sigma value (applyBitShiftingQuantization()). Larger coefficients are shifted by a specified amount (e.g., by 2 bits), which reduces their range and thus compresses the data. 
+        
+        Additional Analysis: Using sigma as a threshold to remove smaller wavelet coefficients before quantization is useful for reducing noise or compressing the image more aggressively.  I decided to add a thresholding operation based on sigma before applying the quantization. Values smaller than sigma will be set to zero, which could be useful if sigma represents a specific noise level we can identify for suppression.  
 
     4) Reconstruction (Inverse Wavelet Transform):
 
@@ -76,7 +78,7 @@ Using a set of functions, and variables, this code performs the following:
             - HL (vertical details) (visible in top right of compressed output tiff)
 
             - HH (diagonal details) (visible in bottom right of compressed output tiff)
-            
+
         While these details are visible in the compressed file (see list above), the code for generating individual output tiff files (e.g. LL tiff, or HH tiff) did not correctly split and resize the original compressed output image.  Therefore, generating individual tiff files for each sub-band was left as optional under the main() function.  
 
 Variables:
@@ -177,10 +179,11 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
     - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
 
-## Project revisions, and Future Development
+## Future Development
 Original thought: 
 - Project data structure implemented:
     - Huffman tree or SPIHT tree (for encoding) (too much time considering the project scope)
     - bit shifting (for grayscale conversion) (wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition, but went down rabbit hole of ARGB vs RGBA and also fell outside of main project scope)
-        
+- Data sets:
+    - originally I proposed to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illlustrate directional sub-bands.
 [more needed, tbd]
