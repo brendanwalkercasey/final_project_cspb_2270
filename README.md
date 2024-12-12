@@ -179,11 +179,100 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
     - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
 
-## Future Development
-Original thought: 
-- Project data structure implemented:
-    - Huffman tree or SPIHT tree (for encoding) (too much time considering the project scope)
-    - bit shifting (for grayscale conversion) (wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition, but went down rabbit hole of ARGB vs RGBA and also fell outside of main project scope)
-- Data sets:
-    - originally I proposed to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illlustrate directional sub-bands.
-[more needed, tbd]
+## Revisions to Original Plan, and Future Development
+My original plans: 
+    -OpenCV versus LibTIFF Libraries:
+        My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
+
+                Package managers:
+                    - Homebrew package manager (decided not to use, until I had more information about this issue - see https://saagarjha.com/blog/2019/04/26/thoughts-on-macos-package-managers/)
+                    - Macports package manager (decided not to use - see above, requires a lot of manual configurations, which runned the risk of time spent learning macports vs data structures needed for my project)
+
+                Examples of General Dependencies from downloading from source:
+                    - pkg-config 
+                        - when i ran pkg-config --modversion opencv4, my terminal returned zsh: command not found: pkg-config
+                    - pkg-config required glib which depending on the version downloaded, could not run ./confgure, and instead required meson tool
+
+                Issues downloading from pre-compiled binaries:
+                    - opencv pre-compiled binaries wouldn't link to my test_opencv.cpp code (test code for reading an image)
+        Libraries Summary:
+        Ultimately I chose the libTIFF library over OpenCV's library.  From my research, OpenCV is designed for programmers who dont want to hassle with the complexities of low-level file handling, and who are working with several image formats, and don’t need to focus exclusively on TIFF files. Using libTIFF turned out to be beneficial because it is designed for TIFFs specifically, and the API for libtiff is lower-level/ more complex than OpenCV’s. Code built on libTIFF source code needs to manage memory allocation, handle different compression types, and deal with the intricacies of the TIFF format manually.  This library provided a more in depth experience for a final project in Data Structures because my project requires fine-grained control over TIFF files, and specific compression methods.
+
+    - Data structure(s) implemented:
+        - Bit shifting for grayscale conversion: I wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition.  I went down rabbit hole of ARGB vs RGBA methods, and how bit shifting and bit masking are applied in different contexts, especially when dealing with different pixel formats and how the individual color channels (Red, Green, Blue, Alpha) are stored in memory.  While it was benefical to learn about RGBA (0xAARRGGBB) (where the red channel is in bits 16–23, so you shift 16 bits to the right to extract it) as well as ARGB (0xRRGGBBAA) (where the red channel is in bits 24–31, so you shift 24 bits to the right to extract it), I determined this fell outside of main project scope, where this time could be better used to learn about wavelet transforms, and apply bitshifting towards compression techniques (the main focus of my project).  
+
+        - SPIHT (Set Partitioning in Hierarchical Trees) is an algorithm specifically designed for wavelet-based image compression, and it's a popular choice because it achieves high compression ratios while preserving image quality. It operates by progressively encoding the most significant wavelet coefficients first, and is particularly well-suited for progressive compression, where an image can be progressively reconstructed as more bits are received.  This was an interesting direction, but was ultimatley abandoned due to time constraints.  However implementing SPIHT fully in C++ requires more attention to data structures like trees and priority queues, and efficient handling of the bitstream for encoding, which would be a great follow-on to this project.
+    - Data sets:
+        - originally I proposed to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illlustrate directional sub-bands.  Additionally, if my objective were to analyze the content of the Landsat image (e.g., vegetation analysis, land use classification, etc.), it was important to consider the raw compression techniques (wavelet transform + SPIHT) might not be the best option unless I was focusing on preserving high-level features. Lossy compression with no additional refinemnt (e.g. atmospheric correction, etc.) can introduce artifacts, which could impact feature extraction accuracy.
+
+
+## Notes:
+
+Additional Compilation Errors:
+    #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (so this is uneccessary)
+
+## Resources
+
+1. TIFF Manipulation (I/O, and built in image processing functions)
+
+LibTIFF library: https://wavelet2d.sourceforge.net/
+LibTIFF Manual: http://www.libtiff.org/man.html
+https://pywavelets.readthedocs.io/en/latest/ref/wavelets.html
+https://graphics.stanford.edu/wikis/cs148-07/Assignment7
+Texas A&M lecture: https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf
+Open Source tiff files: https://people.math.sc.edu/Burkardt/data/tif/tif.html
+
+2. Daubechies Wavelets and Wavelet Transforms
+
+A Primer on Wavelets and Their Scientific Applications by James S. Walker (Portion of Book): https://books.google.com/books?id=F-9VGmsdbdYC&pg=PA29&source=gbs_toc_r&cad=2#v=onepage&q&f=false
+
+http://bearcave.com/misl/misl_tech/wavelets/index.html
+
+http://bearcave.com/misl/misl_tech/wavelets/daubechies/index.html
+
+http://bearcave.com/software/java/wavelets/daubechies/index.html
+
+http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
+
+
+3. Wavelet Compression Theory
+
+https://kids.frontiersin.org/articles/10.3389/frym.2023.1200611
+
+https://www.nytimes.com/2021/09/14/magazine/ingrid-daubechies.html
+
+https://www.researchgate.net/profile/Don-Hong/publication/227246220_Wavelet_Image_Compressor-MinImage/links/64fb85fb90dfd95af61ff2a4/Wavelet-Image-Compressor-MinImage.pdf
+
+Grgic, S., Kers, K., & Grgic, M. (1999, July). Image compression using wavelets. In ISIE'99. Proceedings of the IEEE International Symposium on Industrial Electronics (Cat. No. 99TH8465) (Vol. 1, pp. 99-104). IEEE.
+
+Adriaens, J., & Palsetia, D. SIMD Implementation of the Discrete Wavelet Transform.
+
+Mohammed, F. G., & Al-Dabbas, H. M. (2018). The Effect of Wavelet Coefficient Reduction on Image Compression Using DWT and Daubechies Wavelet Transform. Science International, 30(5), 757-762.
+
+A Review of Image Compression Techniques by Rajandeep Kaur and Pooja Choudhary (Research Paper): https://d1wqtxts1xzle7.cloudfront.net/46755270/rajan_pooja-libre.pdf?1466766740=&response-content-disposition=inline%3B+filename%3DA_Review_of_Image_Compression_Techniques.pdf&Expires=1733956989&Signature=Mna-hra46L4bAr9ET8SXYAQ-EaFNhmGKHx1OCSSv4UmIQ-qVedrQM04dNo304HV5qRSfsJe7Yn~B5617h0ogcliYphOiKJL8vO0R5JOpLZQxtHP08Fsni6-uHb9uhREhGzwTiE3wOL7-7LwDBs4Loso8BM8~xtTX8p~f6cKjHYy5~~gmmbeQS8TpmzmZtSklEwvab73D-By1ZSokL~-AtOs5anOyaRqfbqjsOeped3JKZgkipkJSuY6HV-cPmF72iAG5447B0WJnLPMIxM2plgkm76fOo1o6j76qPZuNJz1bzUTVaCGp-P5Za7yvp7rS3~n7AHL4hrHkDZMHsgJ5cA__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA 
+
+https://dc.etsu.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1108&context=etd
+
+http://www.stat.columbia.edu/~jakulin/Wavelets/index.html
+
+https://ntrs.nasa.gov/api/citations/19660001929/downloads/19660001929.pdf
+
+https://iopscience.iop.org/article/10.1088/1755-1315/280/1/012031/pdf
+
+
+4. Bit Shifting Quantization
+https://www.learncpp.com/cpp-tutorial/bit-manipulation-with-bitwise-operators-and-bit-masks/
+Bitwise Operators in C++ (Tutorial): https://www.learncpp.com/cpp-tutorial/bitwise-operators/
+C++ Bitwise Operators Cheat Sheet: https://en.cppreference.com/w/cpp/language/operator_arithmetic
+
+5. General Image Processing Resources
+
+OpenCV Documentation: https://docs.opencv.org/master/ (ended up not using, but referenced for content and image processing concepts)
+
+https://stackoverflow.com/questions/60377598/change-rgb-to-grayscale-in-c (ended up ot using in final iteration, and just used grayscale images, but referenced for content and concepts for bitshifting)
+
+https://it.nc.gov/documents/files/understanding-compression-geospatial-raster-imagery/open (source for idea to use Lempel-Ziv-Welsh (LZW) method)
+
+6. Visualization of Wavelet Transforms
+
+Matplotlib for Wavelets (https://www.mathworks.com/help/wavelet/gs/introduction-to-the-wavelet-families.html)
