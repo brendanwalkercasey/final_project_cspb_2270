@@ -116,26 +116,46 @@ Variables:
 Functions:
 
     readTiffImage():
-        - This function opens a TIFF file, retrieves image dimensions (width and height), as well as the total number of samples per pixel (samples_per_pixel), and reads the pixel data into a buffer (a 1D vector). Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
-    
-    Lempel-Ziv-Weltch (built-in algorithm for lossless tranforms):
-        - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
+        - This function opens a TIFF image file for reading and loads the image data into a buffer. It extracts key metadata such as the image width, height, and the number of samples per pixel (such as grayscale or color channels). After resizing the buffer to fit the image dimensions, it reads the image scanlines (rows of pixels) one by one and stores them in the buffer. If the file cannot be opened, an error message is displayed. Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
 
     daubechies1D():
-        - Performs one demensional transform on an array, and stores data values in temp vector.  
+        - Performs 1D discrete wavelet transform (DWT) using Daubechies-4 coefficients on a vector of data. It applies both low-pass and high-pass filters to consecutive data values, separating the signal into approximation (low frequency) and detail (high frequency) components. These components are then stored in a temporary vector (temp) and used to update the original data, which is transformed in-place. 
     
     daubechies2D():
-        - Applies the one demensional transform (from daubechies1D()) to rows and columns of an image.
+        - Applies 1D Daubechies-4 wavelet transform (calculated previously) to a 2D image, transforming each row of the image, then applying the same transformation to each column. The process effectively decomposes the image into various frequency components, capturing both horizontal and vertical details. This function modifies the image in-place to store the transformed data.
 
     applyBitShiftingQuantization():
-        - Performs a two-fold operation:
-            - Soft thresholding: sets small values to zero based a given sigma value...
-            - Applies bit shifting to pixel value (converting to integer, shifting, then returning value back to float).  For the sake of simplicity, I decided to shift by 2 bits.
+        - Quantizes data using a simple bit-shifting technique. It iterates through each value in the data and applies soft thresholding by setting values below a given threshold (sigma) to zero. For values above the threshold, the function applies a bit-shift (by 2 bits in this case) to reduce the precision, effectively compressing the data. The result is a quantized version of the original data with reduced size.  For the sake of simplicity, I decided to shift by 2 bits.
+
     waveletTransform():
         - This step applies the Daubechies wavelet transform to decompose the image into multiple subbands (such as approximation, horizontal details, vertical details, and diagonal details). The basic idea behind applying Daubechies wavelets for image compression is to use the wavelet transform to decompose the image into different frequency subbands. These subbands are then quantized and encoded, with the most significant subbands preserved to maintain image quality. The less significant parts (those representing high-frequency noise or detail) can be discarded to achieve compression.  Daubechies wavelets are a family of orthogonal wavelets (meaning that the wavelet functions are mutually orthogonal), developed by Ingrid Daubechies in the late 1980s. They are widely used in signal processing and image compression because of their compact support (non-zero values only within a limited region) and smoothness. These properties make them ideal for efficiently representing signals (especially images) while maintaining a good balance between compression and reconstruction quality. Daubechies wavelets are defined by the number of vanishing moments they have, which influences their ability to approximate polynomial functions. For example, DbN wavelets (Daubechies wavelet with N vanishing moments) are characterized by the number of moments the wavelet function's integral is zero. Db4, Db6, Db8, etc., are common examples, where the number indicates the number of vanishing moments. My code uses 4 total.
     
     writeTiffImage():
-        - Writes final...
+        - Writes an image buffer to a TIFF file, setting various properties of the image such as width, height, and number of samples per pixel. The image data is written row-by-row as scanlines, and compression (LZW) is applied to reduce file size. This function also ensures that the image is saved in a grayscale format with 8 bits per sample.
+
+    inverseDaubechies1D(): 
+        - The inverseDaubechies1D function reverses the effect of the Daubechies-4 1D wavelet transform. It reconstructs the original signal by applying inverse low-pass and high-pass filters to the transformed data. The function operates on the transformed data in-place, updating it with the inverse transformation result, effectively reversing the approximation and detail separation done by the forward wavelet transform.
+
+    inverseDaubechies2D(): 
+        - The inverseDaubechies2D function applies the inverse of the 1D Daubechies-4 wavelet transform to both the rows and columns of a 2D image matrix. It reconstructs the original image by applying the inverse wavelet transform in a manner similar to daubechies2D, first to each row and then to each column, effectively merging the approximation and detail components. The result is an image that approximates the original before any transformation was applied.
+
+    inverseWaveletTransform(): 
+        - This function applies the inverse wavelet transform to an image buffer that was previously compressed using the Daubechies-4 wavelet transform. The image is first converted to a temporary double-precision buffer, then the inverse 2D Daubechies-4 transform is applied. The image is then normalized back to the 8-bit range and written to the buffer, reconstructing the image as closely as possible to its original form before compression.
+
+    writeSubbandToTiff(): 
+        - The writeSubbandToTiff function writes a specific sub-band of a wavelet-transformed image (such as LL, LH, HL, or HH) to a TIFF file. It first finds the minimum and maximum values in the sub-band, normalizes the data to an 8-bit grayscale range (0–255), and then writes the sub-band to a TIFF file. This function allows for visualizing individual wavelet sub-bands, which contain different frequency components of the image.
+
+    daubechies2DWithSubbands(): 
+        - This function decomposes a 2D image into four distinct sub-bands (LL, LH, HL, HH) using the Daubechies-4 wavelet transform. It applies the 1D transform to each row and column of the image, and then separates the result into approximation (LL) and detail (LH, HL, HH) components. These sub-bands represent different frequency content of the image: low frequencies (LL), horizontal details (LH), vertical details (HL), and diagonal details (HH). This decomposition is useful for image compression and analysis.
+
+    Lempel-Ziv-Weltch() (built-in algorithm for lossless tranforms):
+        - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
+
+
+
+
+
+
     
 ## How to run code:
 
