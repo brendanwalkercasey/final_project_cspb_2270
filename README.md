@@ -116,13 +116,43 @@ Variables:
 Functions:
 
     readTiffImage():
-        This function opens a TIFF file, retrieves image dimensions (width and height), as well as the total number of samples per pixel (samples_per_pixel), and reads the pixel data into a buffer (a 1D vector). Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
+        - This function opens a TIFF file, retrieves image dimensions (width and height), as well as the total number of samples per pixel (samples_per_pixel), and reads the pixel data into a buffer (a 1D vector). Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
     
     Lempel-Ziv-Weltch (built-in algorithm for lossless tranforms):
         - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
+
+    daubechies1D():
+        - Performs one demensional transform on an array, and stores data values in temp vector.  
     
+    daubechies2D():
+        - Applies the one demensional transform (from daubechies1D()) to rows and columns of an image.
+
+    applyBitShiftingQuantization():
+        - Performs a two-fold operation:
+            - Soft thresholding: sets small values to zero based a given sigma value...
+            - Applies bit shifting to pixel value (converting to integer, shifting, then returning value back to float).  For the sake of simplicity, I decided to shift by 2 bits.
+    waveletTransform():
+        - This step applies the Daubechies wavelet transform to decompose the image into multiple subbands (such as approximation, horizontal details, vertical details, and diagonal details). The basic idea behind applying Daubechies wavelets for image compression is to use the wavelet transform to decompose the image into different frequency subbands. These subbands are then quantized and encoded, with the most significant subbands preserved to maintain image quality. The less significant parts (those representing high-frequency noise or detail) can be discarded to achieve compression.  Daubechies wavelets are a family of orthogonal wavelets (meaning that the wavelet functions are mutually orthogonal), developed by Ingrid Daubechies in the late 1980s. They are widely used in signal processing and image compression because of their compact support (non-zero values only within a limited region) and smoothness. These properties make them ideal for efficiently representing signals (especially images) while maintaining a good balance between compression and reconstruction quality. Daubechies wavelets are defined by the number of vanishing moments they have, which influences their ability to approximate polynomial functions. For example, DbN wavelets (Daubechies wavelet with N vanishing moments) are characterized by the number of moments the wavelet function's integral is zero. Db4, Db6, Db8, etc., are common examples, where the number indicates the number of vanishing moments. My code uses 4 total.
+    
+    writeTiffImage():
+        - Writes final...
     
 ## How to run code:
+
+    required installations:
+        - libTIFF library (https://libtiff.gitlab.io/libtiff/)
+        - GNU Compiler Collection (https://gcc.gnu.org/)
+
+    - My code can be compiled and run as follows:
+        
+        Compile Command (with flags):
+
+            g++ -std=c++17 -o wavelet_compress wavelet_compression.cpp -ltiff
+
+        Run Executable:
+
+            ./wavelet_compress
+
 ## Write up:
 
 Description:

@@ -47,9 +47,9 @@ Issues (Ongoing):
 
 ******** To-Do *************
 
-- new tiff (grayscale)
-- add inverse transform to v02 (save as new version)
-- incorperate the "example_daubechies.cpp" into my v07 code (and what part is actually creating the four sub-bands of decomposition?)
+
+
+
 - how to make a tree structure for encoding? (like my huffman hw)
 - which part of my code is quantized
 - can I use a daubechies wavelet in lieu of Haar
@@ -58,7 +58,15 @@ Issues (Ongoing):
     2) Convert to Numeric Data: Convert the pixel data into a 2D array or vector of floating-point values, depending on your image data type (grayscale, color, etc.).
     3) Apply Wavelet Transform: Apply the Daubechies wavelet transform to the 2D array (matrix).
     4) Post-process and Encode: After transformation, you would typically quantize, encode, and possibly write the compressed result to a new file.
+
 - create makefile for cleaner execution
+
+[done] new tiff (grayscale)
+    - wanted to keep my project inputs simple (1 band) to focus on the wavlet tranform, compression, encoding and decoding process.
+[done] add inverse transform to v02 (save as new version)
+    - wanted to de-compress my result to see the change (and highlight the effectiveness of compression/pixel data saving
+[done] incorperate the "example_daubechies.cpp" into my v07 code (and what part is actually creating the four sub-bands of decomposition?)
+    - wanted to explicity see how decomposition process was happening by splitting the process by decomposed bands and saved into tangible results
 
 
 ****************************
