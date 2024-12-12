@@ -179,31 +179,34 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
     - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
 
-## Revisions to Original Plan, and Future Development
+## Future Development
 My original plans: 
-    -OpenCV versus LibTIFF Libraries:
-        My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
+    
+    -OpenCV versus LibTIFF Libraries: My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
 
-                Package managers:
+                - Package managers:
                     - Homebrew package manager (decided not to use, until I had more information about this issue - see https://saagarjha.com/blog/2019/04/26/thoughts-on-macos-package-managers/)
                     - Macports package manager (decided not to use - see above, requires a lot of manual configurations, which runned the risk of time spent learning macports vs data structures needed for my project)
 
-                Examples of General Dependencies from downloading from source:
+                - Examples of General Dependencies from downloading from source:
                     - pkg-config 
                         - when i ran pkg-config --modversion opencv4, my terminal returned zsh: command not found: pkg-config
                     - pkg-config required glib which depending on the version downloaded, could not run ./confgure, and instead required meson tool
 
-                Issues downloading from pre-compiled binaries:
+                - Issues downloading from pre-compiled binaries:
                     - opencv pre-compiled binaries wouldn't link to my test_opencv.cpp code (test code for reading an image)
-        Libraries Summary:
-        Ultimately I chose the libTIFF library over OpenCV's library.  From my research, OpenCV is designed for programmers who dont want to hassle with the complexities of low-level file handling, and who are working with several image formats, and don’t need to focus exclusively on TIFF files. Using libTIFF turned out to be beneficial because it is designed for TIFFs specifically, and the API for libtiff is lower-level/ more complex than OpenCV’s. Code built on libTIFF source code needs to manage memory allocation, handle different compression types, and deal with the intricacies of the TIFF format manually.  This library provided a more in depth experience for a final project in Data Structures because my project requires fine-grained control over TIFF files, and specific compression methods.
+        
+        -Libraries Summary: Ultimately I chose the libTIFF library over OpenCV's library.  From my research, OpenCV is designed for programmers who dont want to hassle with the complexities of low-level file handling, and who are working with several image formats, and don’t need to focus exclusively on TIFF files. Using libTIFF turned out to be beneficial because it is designed for TIFFs specifically, and the API for libtiff is lower-level/ more complex than OpenCV’s. Code built on libTIFF source code needs to manage memory allocation, handle different compression types, and deal with the intricacies of the TIFF format manually.  This library provided a more in depth experience for a final project in Data Structures because my project requires fine-grained control over TIFF files, and specific compression methods.
 
-    - Data structure(s) implemented:
+    - Data structure(s) implemented: 
+    
         - Bit shifting for grayscale conversion: I wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition.  I went down rabbit hole of ARGB vs RGBA methods, and how bit shifting and bit masking are applied in different contexts, especially when dealing with different pixel formats and how the individual color channels (Red, Green, Blue, Alpha) are stored in memory.  While it was benefical to learn about RGBA (0xAARRGGBB) (where the red channel is in bits 16–23, so you shift 16 bits to the right to extract it) as well as ARGB (0xRRGGBBAA) (where the red channel is in bits 24–31, so you shift 24 bits to the right to extract it), I determined this fell outside of main project scope, where this time could be better used to learn about wavelet transforms, and apply bitshifting towards compression techniques (the main focus of my project).  
 
         - SPIHT (Set Partitioning in Hierarchical Trees) is an algorithm specifically designed for wavelet-based image compression, and it's a popular choice because it achieves high compression ratios while preserving image quality. It operates by progressively encoding the most significant wavelet coefficients first, and is particularly well-suited for progressive compression, where an image can be progressively reconstructed as more bits are received.  This was an interesting direction, but was ultimatley abandoned due to time constraints.  However implementing SPIHT fully in C++ requires more attention to data structures like trees and priority queues, and efficient handling of the bitstream for encoding, which would be a great follow-on to this project.
+    
     - Data sets:
-        - originally I proposed to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illlustrate directional sub-bands.  Additionally, if my objective were to analyze the content of the Landsat image (e.g., vegetation analysis, land use classification, etc.), it was important to consider the raw compression techniques (wavelet transform + SPIHT) might not be the best option unless I was focusing on preserving high-level features. Lossy compression with no additional refinemnt (e.g. atmospheric correction, etc.) can introduce artifacts, which could impact feature extraction accuracy.
+        
+        - In my proposal, I planned to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illlustrate directional sub-bands.  Additionally, if my objective were to analyze the content of the Landsat image (e.g., vegetation analysis, land use classification, etc.), it was important to consider the raw compression techniques (wavelet transform + SPIHT) might not be the best option unless I was focusing on preserving high-level features. Lossy compression with no additional refinemnt (e.g. atmospheric correction, etc.) can introduce artifacts, which could impact feature extraction accuracy.
 
 
 ## Notes:
@@ -215,12 +218,12 @@ Additional Compilation Errors:
 
 1. TIFF Manipulation (I/O, and built in image processing functions)
 
-LibTIFF library: https://wavelet2d.sourceforge.net/
-LibTIFF Manual: http://www.libtiff.org/man.html
-https://pywavelets.readthedocs.io/en/latest/ref/wavelets.html
-https://graphics.stanford.edu/wikis/cs148-07/Assignment7
-Texas A&M lecture: https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf
-Open Source tiff files: https://people.math.sc.edu/Burkardt/data/tif/tif.html
+    - LibTIFF library: https://wavelet2d.sourceforge.net/
+    - LibTIFF Manual: http://www.libtiff.org/man.html
+    - https://pywavelets.readthedocs.io/en/latest/ref/wavelets.html
+    - https://graphics.stanford.edu/wikis/cs148-07/Assignment7
+    - Texas A&M lecture: https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf
+    - Open Source tiff files: https://people.math.sc.edu/Burkardt/data/tif/tif.html
 
 2. Daubechies Wavelets and Wavelet Transforms
 
