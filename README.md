@@ -211,12 +211,12 @@ My original plans:
 
 ## Notes:
 
-Additional Compilation Errors:
-    #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (so this is uneccessary)
+    - Additional Compilation Errors:
+        - #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (so this is uneccessary)
 
 ## Resources
 
-1. TIFF Manipulation (I/O, and built in image processing functions)
+1. TIFF Manipulation (I/O, and built in image processing functions):
 
     - LibTIFF library: https://wavelet2d.sourceforge.net/
     - LibTIFF Manual: http://www.libtiff.org/man.html
@@ -227,55 +227,39 @@ Additional Compilation Errors:
 
 2. Daubechies Wavelets and Wavelet Transforms
 
-A Primer on Wavelets and Their Scientific Applications by James S. Walker (Portion of Book): https://books.google.com/books?id=F-9VGmsdbdYC&pg=PA29&source=gbs_toc_r&cad=2#v=onepage&q&f=false
-
-http://bearcave.com/misl/misl_tech/wavelets/index.html
-
-http://bearcave.com/misl/misl_tech/wavelets/daubechies/index.html
-
-http://bearcave.com/software/java/wavelets/daubechies/index.html
-
-http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
+    - A Primer on Wavelets and Their Scientific Applications by James S. Walker (Portion of Book): https://books.google.com/books?id=F-9VGmsdbdYC&pg=PA29&source=gbs_toc_r&cad=2#v=onepage&q&f=false
+    - http://bearcave.com/misl/misl_tech/wavelets/index.html
+    - http://bearcave.com/misl/misl_tech/wavelets/daubechies/index.html
+    - http://bearcave.com/software/java/wavelets/daubechies/index.html
+    - http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
 
 
 3. Wavelet Compression Theory
 
-https://kids.frontiersin.org/articles/10.3389/frym.2023.1200611
+    - https://kids.frontiersin.org/articles/10.3389/frym.2023.1200611
+    - https://www.nytimes.com/2021/09/14/magazine/ingrid-daubechies.html
+    - https://www.researchgate.net/profile/Don-Hong/publication/227246220_Wavelet_Image_Compressor-MinImage/links/64fb85fb90dfd95af61ff2a4/Wavelet-Image-Compressor-MinImage.pdf
+    - Grgic, S., Kers, K., & Grgic, M. (1999, July). Image compression using wavelets. In ISIE'99. Proceedings of the IEEE International Symposium on Industrial Electronics (Cat. No. 99TH8465) (Vol. 1, pp. 99-104). IEEE.
+    - Adriaens, J., & Palsetia, D. SIMD Implementation of the Discrete Wavelet Transform.
+    - Mohammed, F. G., & Al-Dabbas, H. M. (2018). The Effect of Wavelet Coefficient Reduction on Image Compression Using DWT and Daubechies Wavelet Transform. Science International, 30(5), 757-762.
+    - A Review of Image Compression Techniques by Rajandeep Kaur and Pooja Choudhary (Research Paper): https://d1wqtxts1xzle7.cloudfront.net/46755270/rajan_pooja-libre.pdf?1466766740=&response-content-disposition=inline%3B+filename%3DA_Review_of_Image_Compression_Techniques.pdf&Expires=1733956989&Signature=Mna-hra46L4bAr9ET8SXYAQ-EaFNhmGKHx1OCSSv4UmIQ-qVedrQM04dNo304HV5qRSfsJe7Yn~B5617h0ogcliYphOiKJL8vO0R5JOpLZQxtHP08Fsni6-uHb9uhREhGzwTiE3wOL7-7LwDBs4Loso8BM8~xtTX8p~f6cKjHYy5~~gmmbeQS8TpmzmZtSklEwvab73D-By1ZSokL~-AtOs5anOyaRqfbqjsOeped3JKZgkipkJSuY6HV-cPmF72iAG5447B0WJnLPMIxM2plgkm76fOo1o6j76qPZuNJz1bzUTVaCGp-P5Za7yvp7rS3~n7AHL4hrHkDZMHsgJ5cA__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA 
+    - https://dc.etsu.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1108&context=etd
+    - http://www.stat.columbia.edu/~jakulin/Wavelets/index.html
+    - https://ntrs.nasa.gov/api/citations/19660001929/downloads/19660001929.pdf
+    - https://iopscience.iop.org/article/10.1088/1755-1315/280/1/012031/pdf
 
-https://www.nytimes.com/2021/09/14/magazine/ingrid-daubechies.html
+4. Bit Shifting Quantization:
+    
+    - https://www.learncpp.com/cpp-tutorial/bit-manipulation-with-bitwise-operators-and-bit-masks/
+    - Bitwise Operators in C++ (Tutorial): https://www.learncpp.com/cpp-tutorial/bitwise-operators/
+    - C++ Bitwise Operators Cheat Sheet: https://en.cppreference.com/w/cpp/language/operator_arithmetic
 
-https://www.researchgate.net/profile/Don-Hong/publication/227246220_Wavelet_Image_Compressor-MinImage/links/64fb85fb90dfd95af61ff2a4/Wavelet-Image-Compressor-MinImage.pdf
+5. General Image Processing Resources:
 
-Grgic, S., Kers, K., & Grgic, M. (1999, July). Image compression using wavelets. In ISIE'99. Proceedings of the IEEE International Symposium on Industrial Electronics (Cat. No. 99TH8465) (Vol. 1, pp. 99-104). IEEE.
-
-Adriaens, J., & Palsetia, D. SIMD Implementation of the Discrete Wavelet Transform.
-
-Mohammed, F. G., & Al-Dabbas, H. M. (2018). The Effect of Wavelet Coefficient Reduction on Image Compression Using DWT and Daubechies Wavelet Transform. Science International, 30(5), 757-762.
-
-A Review of Image Compression Techniques by Rajandeep Kaur and Pooja Choudhary (Research Paper): https://d1wqtxts1xzle7.cloudfront.net/46755270/rajan_pooja-libre.pdf?1466766740=&response-content-disposition=inline%3B+filename%3DA_Review_of_Image_Compression_Techniques.pdf&Expires=1733956989&Signature=Mna-hra46L4bAr9ET8SXYAQ-EaFNhmGKHx1OCSSv4UmIQ-qVedrQM04dNo304HV5qRSfsJe7Yn~B5617h0ogcliYphOiKJL8vO0R5JOpLZQxtHP08Fsni6-uHb9uhREhGzwTiE3wOL7-7LwDBs4Loso8BM8~xtTX8p~f6cKjHYy5~~gmmbeQS8TpmzmZtSklEwvab73D-By1ZSokL~-AtOs5anOyaRqfbqjsOeped3JKZgkipkJSuY6HV-cPmF72iAG5447B0WJnLPMIxM2plgkm76fOo1o6j76qPZuNJz1bzUTVaCGp-P5Za7yvp7rS3~n7AHL4hrHkDZMHsgJ5cA__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA 
-
-https://dc.etsu.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=1108&context=etd
-
-http://www.stat.columbia.edu/~jakulin/Wavelets/index.html
-
-https://ntrs.nasa.gov/api/citations/19660001929/downloads/19660001929.pdf
-
-https://iopscience.iop.org/article/10.1088/1755-1315/280/1/012031/pdf
-
-
-4. Bit Shifting Quantization
-https://www.learncpp.com/cpp-tutorial/bit-manipulation-with-bitwise-operators-and-bit-masks/
-Bitwise Operators in C++ (Tutorial): https://www.learncpp.com/cpp-tutorial/bitwise-operators/
-C++ Bitwise Operators Cheat Sheet: https://en.cppreference.com/w/cpp/language/operator_arithmetic
-
-5. General Image Processing Resources
-
-OpenCV Documentation: https://docs.opencv.org/master/ (ended up not using, but referenced for content and image processing concepts)
-
-https://stackoverflow.com/questions/60377598/change-rgb-to-grayscale-in-c (ended up ot using in final iteration, and just used grayscale images, but referenced for content and concepts for bitshifting)
-
-https://it.nc.gov/documents/files/understanding-compression-geospatial-raster-imagery/open (source for idea to use Lempel-Ziv-Welsh (LZW) method)
+    - OpenCV Documentation: https://docs.opencv.org/master/ (ended up not using, but referenced for content and image processing concepts)
+    - https://stackoverflow.com/questions/60377598/change-rgb-to-grayscale-in-c (ended up ot using in final iteration, and just used grayscale images, but referenced for content and concepts for bitshifting)
+    - https://it.nc.gov/documents/files/understanding-compression-geospatial-raster-imagery/open (source for idea to use Lempel-Ziv-Welsh (LZW) method)
 
 6. Visualization of Wavelet Transforms
 
-Matplotlib for Wavelets (https://www.mathworks.com/help/wavelet/gs/introduction-to-the-wavelet-families.html)
+    - Matplotlib for Wavelets (https://www.mathworks.com/help/wavelet/gs/introduction-to-the-wavelet-families.html)
