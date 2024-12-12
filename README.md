@@ -11,7 +11,8 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
 
 
 ## Details:
-Data structures and techniques implemented:
+
+Data Structures/Techniques Implemented:
 
     - Vectors (main base structure for storing image data, in the form of 1-D and 2-D arrays, typically with 8-bit, 16-bit, unsigned integers, or float types)
 
@@ -24,62 +25,6 @@ Data structures and techniques implemented:
     - Bit-Shifting (simple and fast operations with minimal computations to reduce data on individual pixel values, effectively compressing image file with fewer bits)
 
 
-Using a set of functions, and variables, this code performs the following:
-
-    1) Read the TIFF Image into a Buffer:
-
-        Action: The image is read into a buffer (vector<u8>), where each pixel is stored as a grayscale value (an 8-bit unsigned integer).
-        Details: The image's dimensions (width, height) and the number of samples per pixel (e.g., grayscale = 1) are retrieved from the TIFF metadata.
-
-    2) Apply Wavelet Compression (Daubechies-4 Transform):
-
-        2a) Convert to Numeric Data:
-
-            - The 1D buffer (which holds pixel values) is converted to a 2D matrix (vector<vector<float>>) where each value is a floating-point representation of the pixel. This conversion is necessary for performing the wavelet transformation.
-
-        2b) Apply Wavelet Transform:
-
-            - The 2D Daubechies-4 wavelet transform is applied to the image in two steps:
-
-                1) 1D transform is applied to each row of the image.
-
-                2) 1D transform is applied to each column of the image.
-
-    3) Quantization:
-
-        Action: The wavelet coefficients are quantized using bit-shifting. This process reduces the precision of the coefficients for compression.
-
-        Details: Small coefficients are thresholded to zero based on a sigma value (applyBitShiftingQuantization()). Larger coefficients are shifted by a specified amount (e.g., by 2 bits), which reduces their range and thus compresses the data. 
-        
-        Additional Analysis: Using sigma as a threshold to remove smaller wavelet coefficients before quantization is useful for reducing noise or compressing the image more aggressively.  I decided to add a thresholding operation based on sigma before applying the quantization. Values smaller than sigma will be set to zero, which could be useful if sigma represents a specific noise level we can identify for suppression.  
-
-    4) Reconstruction (Inverse Wavelet Transform):
-
-        Action: The inverse Daubechies-4 wavelet transform is applied to reconstruct the image from its wavelet sub-bands.
-
-        Details: The image is reconstructed by applying the inverse wavelet transform (first on columns, then on rows), reversing the effect of the initial wavelet transform.
-
-    5) Post-process and Encode:
-
-        5a) Normalize the Data: The transformed image data is normalized back to the 0-255 grayscale range for proper display. This normalization ensures that the pixel values fit within the standard 8-bit range.
-
-        5b) Save the Processed Image: The compressed (and potentially quantized) image is saved to a new TIFF file using LZW compression for file size reduction.
-        
-        5c) Reconstruct and Save the Image: The image is reconstructed using the inverse wavelet transform (as described earlier) and then saved to another TIFF file as the "reconstructed" version.
-
-    6) Additional Steps: 
-
-        - Sub-Band Decomposition: After applying the wavelet transform, four sub-bands are created to illustrate details of directional components of the image:
-
-            - LL (approximation) (visible in top left of compressed output tiff)
-
-            - LH (horizontal details) (visible in bottom left of compressed output tiff)
-
-            - HL (vertical details) (visible in top right of compressed output tiff)
-
-            - HH (diagonal details) (visible in bottom right of compressed output tiff)
-
-        While these details are visible in the compressed file (see list above), the code for generating individual output tiff files (e.g. LL tiff, or HH tiff) did not correctly split and resize the original compressed output image.  Therefore, generating individual tiff files for each sub-band was left as optional under the main() function.  
 
 Variables:
 
@@ -151,9 +96,62 @@ Functions:
     Lempel-Ziv-Weltch() (built-in algorithm for lossless tranforms):
         - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
 
+Steps:
 
+    1) Read the TIFF Image into a Buffer:
 
+        Action: The image is read into a buffer (vector<u8>), where each pixel is stored as a grayscale value (an 8-bit unsigned integer).
+        Details: The image's dimensions (width, height) and the number of samples per pixel (e.g., grayscale = 1) are retrieved from the TIFF metadata.
 
+    2) Apply Wavelet Compression (Daubechies-4 Transform):
+
+        2a) Convert to Numeric Data:
+
+            - The 1D buffer (which holds pixel values) is converted to a 2D matrix (vector<vector<float>>) where each value is a floating-point representation of the pixel. This conversion is necessary for performing the wavelet transformation.
+
+        2b) Apply Wavelet Transform:
+
+            - The 2D Daubechies-4 wavelet transform is applied to the image in two steps:
+
+                1) 1D transform is applied to each row of the image.
+
+                2) 1D transform is applied to each column of the image.
+
+    3) Quantization:
+
+        Action: The wavelet coefficients are quantized using bit-shifting. This process reduces the precision of the coefficients for compression.
+
+        Details: Small coefficients are thresholded to zero based on a sigma value (applyBitShiftingQuantization()). Larger coefficients are shifted by a specified amount (e.g., by 2 bits), which reduces their range and thus compresses the data. 
+        
+        Additional Analysis: Using sigma as a threshold to remove smaller wavelet coefficients before quantization is useful for reducing noise or compressing the image more aggressively.  I decided to add a thresholding operation based on sigma before applying the quantization. Values smaller than sigma will be set to zero, which could be useful if sigma represents a specific noise level we can identify for suppression.  
+
+    4) Reconstruction (Inverse Wavelet Transform):
+
+        Action: The inverse Daubechies-4 wavelet transform is applied to reconstruct the image from its wavelet sub-bands.
+
+        Details: The image is reconstructed by applying the inverse wavelet transform (first on columns, then on rows), reversing the effect of the initial wavelet transform.
+
+    5) Post-process and Encode:
+
+        5a) Normalize the Data: The transformed image data is normalized back to the 0-255 grayscale range for proper display. This normalization ensures that the pixel values fit within the standard 8-bit range.
+
+        5b) Save the Processed Image: The compressed (and potentially quantized) image is saved to a new TIFF file using LZW compression for file size reduction.
+        
+        5c) Reconstruct and Save the Image: The image is reconstructed using the inverse wavelet transform (as described earlier) and then saved to another TIFF file as the "reconstructed" version.
+
+    6) Additional Steps: 
+
+        - Sub-Band Decomposition: After applying the wavelet transform, four sub-bands are created to illustrate details of directional components of the image:
+
+            - LL (approximation) (visible in top left of compressed output tiff)
+
+            - LH (horizontal details) (visible in bottom left of compressed output tiff)
+
+            - HL (vertical details) (visible in top right of compressed output tiff)
+
+            - HH (diagonal details) (visible in bottom right of compressed output tiff)
+
+        While these details are visible in the compressed file (see list above), the code for generating individual output tiff files (e.g. LL tiff, or HH tiff) did not correctly split and resize the original compressed output image.  Therefore, generating individual tiff files for each sub-band was left as optional under the main() function.  
 
 
     
