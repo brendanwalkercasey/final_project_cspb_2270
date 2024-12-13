@@ -53,11 +53,12 @@ void readTiffImage(const char* filename, vector<uint8_t>& buffer, uint32_t& widt
     uint32_t paddedWidth = (width + 3) / 4 * 4;  // Round up to next multiple of 4
     uint32_t paddedHeight = (height + 3) / 4 * 4;  // Round up to next multiple of 4
 
+    // Resize the buffer to the padded size
+    buffer.resize(paddedWidth * paddedHeight * samples_per_pixel);
 
-    buffer.resize(width * height * samples_per_pixel);
-        
+    // Read the image scanlines into the buffer
     for (uint32_t row = 0; row < height; row++) {
-        TIFFReadScanline(tiff.get(), &buffer[row * width * samples_per_pixel], row);
+        TIFFReadScanline(tiff.get(), &buffer[row * paddedWidth * samples_per_pixel], row);
     }
 }
 
