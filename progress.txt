@@ -48,7 +48,6 @@ Issues (Ongoing):
 ******** To-Do *************
 
 - keep running code to ensure it works!!!
-- README->functions and short description
 - re-name output files (tiffs)
 - README-> (embbed images)
 - organize write up (with analysis, results, future development, etc.)
@@ -56,6 +55,7 @@ Issues (Ongoing):
 
 ***[extra]***
 [done] how to save my decomposed parts of the Daubechies transform?
+	-sizing tbd...still cant get it to work
 - create makefile for cleaner execution?
 - separate into h-file and individual cpp files?
 
@@ -89,7 +89,7 @@ Issues (Ongoing):
 [done] add thresholding discussion (with explination of sigma, see below) to README->Analysis
 	- e.g. "Using sigma as a threshold to remove smaller wavelet coefficients before quantization is useful for reducing noise or compressing the image more aggressively"
 	- e.g. "I decided to add a thresholding operation based on sigma before applying the quantization. Values smaller than sigma will be set to zero, which could be useful if sigma represents a noise level that I can suppress"
-
+[done] README->functions and short description
 
 ****************************
 

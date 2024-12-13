@@ -5,33 +5,58 @@
 #include <cmath>
 #include <algorithm>
 #include <cfloat>  // for FLT_MAX and -FLT_MAX
+
 // ******for brevity ********
-#define u32 std::uint32_t
-#define u16 std::uint16_t
-#define u8 std::uint8_t
+//typedef std::uint32_t u32; 
+//typedef std::uint16_t u16;
+//typedef std::uint8_t u8;
+// typdef instead of "#define", so its avoiding potential conflictions with other macros.  
+// With typdef, this issue does not occur because it is a language feature rather than a preprocessor directive.
 using namespace std;
 // **************************
 
+// Custom deleter for TIFF* to ensure proper cleanup
+void TIFFCloseDeleter(TIFF* tiff) {
+    if (tiff) {
+        TIFFClose(tiff);
+    }
+}
 
 // Function to read the TIFF image into a buffer
-void readTiffImage(const char* filename, vector<u8>& buffer, u32& width, u32& height, u16& samples_per_pixel) {
-    TIFF* tiff = TIFFOpen(filename, "r");
-    if (tiff == nullptr) {
+void readTiffImage(const char* filename, vector<uint8_t>& buffer, uint32_t& width, uint32_t& height, uint16_t& samples_per_pixel) {
+    //TIFF* tiff = TIFFOpen(filename, "r");
+    // Using std::unique_ptr with custom deleter to automatically close the TIFF file
+    std::unique_ptr<TIFF, decltype(&TIFFCloseDeleter)> tiff(TIFFOpen(filename, "r"), TIFFCloseDeleter);
+    
+    if (!tiff) {
         cerr << "Could not open TIFF file!" << endl;
         return;
     }
 
-    TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
-    TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
-    TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samples_per_pixel);
-
-    buffer.resize(width * height * samples_per_pixel);
-    for (u32 row = 0; row < height; row++) {
-        TIFFReadScanline(tiff, &buffer[row * width * samples_per_pixel], row);
+    if (!TIFFGetField(tiff.get(), TIFFTAG_IMAGEWIDTH, &width) ||
+        !TIFFGetField(tiff.get(), TIFFTAG_IMAGELENGTH, &height) ||
+        !TIFFGetField(tiff.get(), TIFFTAG_SAMPLESPERPIXEL, &samples_per_pixel)) {
+            cerr << "Error reading TIFF fields!" << endl;
+            TIFFClose(tiff.get());
+            return;
     }
 
-    TIFFClose(tiff);
-}
+    // Ensure width and height are even
+    if (width % 2 != 0) {
+        width++;
+        buffer.resize(width * height);  // Resize the buffer to accommodate the new width
+    }
+    if (height % 2 != 0) {
+        height++;
+        buffer.resize(width * height);  // Resize the buffer to accommodate the new height
+    }
+
+        buffer.resize(width * height * samples_per_pixel);
+        
+        for (uint32_t row = 0; row < height; row++) {
+            TIFFReadScanline(tiff.get(), &buffer[row * width * samples_per_pixel], row);
+        }
+    }
 
 // Daubechies-4 low-pass and high-pass filter coefficients
 const float h0 = (1 + sqrt(3)) / (4 * sqrt(2));
@@ -105,18 +130,18 @@ void applyBitShiftingQuantization(vector<float>& data, double sigma) {
 
 
 // Function to apply wavelet compression with bit-shifting quantization
-void waveletTransform(vector<u8>& buffer, u32 width, u32 height, double sigma, int bitShiftAmount) {
+void waveletTransform(vector<uint8_t>& buffer, uint32_t width, uint32_t height, double sigma, int bitShiftAmount) {
     vector<double> tempBuffer(width * height);
 
-    // Convert the u8 buffer to double for the wavelet transform
-    for (u32 i = 0; i < width * height; i++) {
+    // Convert the uint8_t buffer to double for the wavelet transform
+    for (uint32_t i = 0; i < width * height; i++) {
         tempBuffer[i] = static_cast<double>(buffer[i]);
     }
 
     // Create a 2D image matrix
     vector<vector<float>> image(height, vector<float>(width));
-    for (u32 row = 0; row < height; row++) {
-        for (u32 col = 0; col < width; col++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t col = 0; col < width; col++) {
             image[row][col] = static_cast<float>(tempBuffer[row * width + col]);
         }
     }
@@ -125,13 +150,13 @@ void waveletTransform(vector<u8>& buffer, u32 width, u32 height, double sigma, i
     daubechies2D(image);
 
     // Apply bit-shifting quantization
-    for (u32 row = 0; row < height; row++) {
+    for (uint32_t row = 0; row < height; row++) {
         applyBitShiftingQuantization(image[row], bitShiftAmount);
     }
 
     // Convert back to 1D buffer
-    for (u32 row = 0; row < height; row++) {
-        for (u32 col = 0; col < width; col++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t col = 0; col < width; col++) {
             tempBuffer[row * width + col] = image[row][col];
         }
     }
@@ -140,32 +165,39 @@ void waveletTransform(vector<u8>& buffer, u32 width, u32 height, double sigma, i
     double minVal = *min_element(tempBuffer.begin(), tempBuffer.end());
     double maxVal = *max_element(tempBuffer.begin(), tempBuffer.end());
 
-    for (u32 i = 0; i < width * height; i++) {
-        double normalized = (tempBuffer[i] - minVal) / (maxVal - minVal) * 255.0;
-        buffer[i] = static_cast<u8>(std::clamp(normalized, 0.0, 255.0));
+    if (maxVal == minVal) {
+    // Handle the case where min and max are the same (b/c would this cause blank grey output?)
+    fill(buffer.begin(), buffer.end(), 128);  // Arbitrary mid-level grayscale value
+    } else {
+        for (uint32_t i = 0; i < width * height; i++) {
+            double normalized = (tempBuffer[i] - minVal) / (maxVal - minVal) * 255.0;
+            buffer[i] = static_cast<uint8_t>(std::clamp(normalized, 0.0, 255.0));
+        }
     }
 }
 
-// Function to write the TIFF image from the buffer
-void writeTiffImage(const char* filename, const vector<u8>& buffer, u32 width, u32 height, u16 samples_per_pixel) {
-    TIFF* tiff = TIFFOpen(filename, "w");
-    if (tiff == nullptr) {
-        cerr << "Could not open TIFF file for writing!" << endl;
+// Function to write a TIFF image from a buffer
+void writeTiffImage(const char* filename, const std::vector<uint8_t>& buffer, uint32_t width, uint32_t height, uint16_t samples_per_pixel) {
+    std::unique_ptr<TIFF, decltype(&TIFFCloseDeleter)> tiff(TIFFOpen(filename, "w"), TIFFCloseDeleter);
+    
+    if (!tiff) {
+        std::cerr << "Could not open TIFF file for writing!" << std::endl;
         return;
     }
 
-    TIFFSetField(tiff, TIFFTAG_IMAGEWIDTH, width);
-    TIFFSetField(tiff, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, samples_per_pixel);  
-    TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);  
-    TIFFSetField(tiff, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+    TIFFSetField(tiff.get(), TIFFTAG_IMAGEWIDTH, width);
+    TIFFSetField(tiff.get(), TIFFTAG_IMAGELENGTH, height);
+    TIFFSetField(tiff.get(), TIFFTAG_SAMPLESPERPIXEL, samples_per_pixel);
+    TIFFSetField(tiff.get(), TIFFTAG_BITSPERSAMPLE, 8);
+    TIFFSetField(tiff.get(), TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+    TIFFSetField(tiff.get(), TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 
-    for (u32 row = 0; row < height; row++) {
-        TIFFWriteScanline(tiff, const_cast<u8*>(&buffer[row * width]), row);
+    // Write image scanlines
+    for (uint32_t row = 0; row < height; ++row) {
+        TIFFWriteScanline(tiff.get(), const_cast<uint8_t*>(&buffer[row * width]), row);
     }
 
-    TIFFClose(tiff);
+    // TIFF file auto-closed, when it goes out of scope
 }
 
 void inverseDaubechies1D(vector<float>& data) {
@@ -204,18 +236,18 @@ void inverseDaubechies2D(vector<vector<float>>& image) {
     }
 }
 
-void inverseWaveletTransform(vector<u8>& buffer, u32 width, u32 height) {
-    // Convert the u8 buffer to double for inverse transform
+void inverseWaveletTransform(vector<uint8_t>& buffer, uint32_t width, uint32_t height) {
+    // Convert the uint8_t buffer to double for inverse transform
     vector<double> tempBuffer(width * height);
 
-    for (u32 i = 0; i < width * height; i++) {
+    for (uint32_t i = 0; i < width * height; i++) {
         tempBuffer[i] = static_cast<double>(buffer[i]);
     }
 
     // Create a 2D image matrix for inverse transform
     vector<vector<float>> image(height, vector<float>(width));
-    for (u32 row = 0; row < height; row++) {
-        for (u32 col = 0; col < width; col++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t col = 0; col < width; col++) {
             image[row][col] = static_cast<float>(tempBuffer[row * width + col]);
         }
     }
@@ -224,8 +256,8 @@ void inverseWaveletTransform(vector<u8>& buffer, u32 width, u32 height) {
     inverseDaubechies2D(image);
 
     // Convert back to 1D buffer after the inverse transform
-    for (u32 row = 0; row < height; row++) {
-        for (u32 col = 0; col < width; col++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t col = 0; col < width; col++) {
             tempBuffer[row * width + col] = image[row][col];
         }
     }
@@ -234,15 +266,15 @@ void inverseWaveletTransform(vector<u8>& buffer, u32 width, u32 height) {
     double minVal = *min_element(tempBuffer.begin(), tempBuffer.end());
     double maxVal = *max_element(tempBuffer.begin(), tempBuffer.end());
 
-    for (u32 i = 0; i < width * height; i++) {
+    for (uint32_t i = 0; i < width * height; i++) {
         double normalized = (tempBuffer[i] - minVal) / (maxVal - minVal) * 255.0;
-        buffer[i] = static_cast<u8>(std::clamp(normalized, 0.0, 255.0));
+        buffer[i] = static_cast<uint8_t>(std::clamp(normalized, 0.0, 255.0));
     }
 }
 
 // Function to write a 2D matrix (sub-band) to a TIFF image
-void writeSubbandToTiff(const char* filename, const vector<vector<float>>& subband, u32 width, u32 height) {
-    vector<u8> buffer(width * height);
+void writeSubbandToTiff(const char* filename, const vector<vector<float>>& subband, uint32_t width, uint32_t height) {
+    vector<uint8_t> buffer(width * height);
 
     // Find the min and max values in the subband
     float minVal = FLT_MAX;
@@ -258,10 +290,10 @@ void writeSubbandToTiff(const char* filename, const vector<vector<float>>& subba
         fill(buffer.begin(), buffer.end(), 128);  // Assign a mid-level grayscale value
     } else {
         // Normalize and convert the sub-band to 8-bit values (0-255)
-        for (u32 i = 0; i < height; i++) {
-            for (u32 j = 0; j < width; j++) {
+        for (uint32_t i = 0; i < height; i++) {
+            for (uint32_t j = 0; j < width; j++) {
                 float normalized = ((subband[i][j] - minVal) / (maxVal - minVal)) * 255.0f;
-                buffer[i * width + j] = static_cast<u8>(std::clamp(normalized, 0.0f, 255.0f));
+                buffer[i * width + j] = static_cast<uint8_t>(std::clamp(normalized, 0.0f, 255.0f));
             }
         }
     }
@@ -276,8 +308,15 @@ void daubechies2DWithSubbands(vector<vector<float>>& image,
                               vector<vector<float>>& LH, 
                               vector<vector<float>>& HL, 
                               vector<vector<float>>& HH) {
+    
+    
     int rows = image.size();
     int cols = image[0].size();
+
+    if (rows % 2 != 0 || cols % 2 != 0) {
+        cerr << "Image dimensions must be even for sub-band splitting!" << endl;
+        return;
+    }
 
     // Temporary buffers to hold transformed rows and columns
     vector<vector<float>> tempRows(rows, vector<float>(cols));
@@ -340,16 +379,16 @@ void daubechies2DWithSubbands(vector<vector<float>>& image,
 int main() {
     // Input and output file paths
     const char* inputFile = "cameraman.tif";
-    const char* outputFile = "v12_shift2_sigma42_output_compressed.tif";
-    const char* outputReconstructedFile = "v12_shift2_sigma42_bitshift3_output_reconstructed.tif";
+    const char* outputFile = "v12_shift2_sigma12_output_compressed.tif";
+    const char* outputReconstructedFile = "v12_shift2_sigma12_output_reconstructed.tif";
     
-    u32 width, height;
-    u16 samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)
-    double sigma = 42;  // Thresholding value for quantization
+    uint32_t width, height = 0; // directly assign, to avoid potential memory errors
+    uint16_t samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)
+    double sigma = 99;  // Thresholding value for quantization
     int bitShiftAmount = 2;  // Example: shift by 2 bits (divide by 8)
 
     // Step 1: Read the TIFF image into a buffer
-    vector<u8> buffer;
+    vector<uint8_t> buffer;
     readTiffImage(inputFile, buffer, width, height, samples_per_pixel);
 
     // Step 2: Apply wavelet compression with bit-shifting quantization
@@ -361,8 +400,8 @@ int main() {
     // Optional Step: Decompose the image into sub-bands (LL, LH, HL, HH)
     // Convert to 2D matrix for easier manipulation
     vector<vector<float>> image(height, vector<float>(width));
-    for (u32 row = 0; row < height; row++) {
-        for (u32 col = 0; col < width; col++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t col = 0; col < width; col++) {
             image[row][col] = static_cast<float>(buffer[row * width + col]);
         }
     }
