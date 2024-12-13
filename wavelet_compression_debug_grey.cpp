@@ -60,6 +60,7 @@ void readTiffImage(const char* filename, vector<uint8_t>& buffer, uint32_t& widt
     for (uint32_t row = 0; row < height; row++) {
         TIFFReadScanline(tiff.get(), &buffer[row * paddedWidth * samples_per_pixel], row);
     }
+    
 }
 
 // Daubechies-4 low-pass and high-pass filter coefficients
@@ -134,7 +135,18 @@ void applyBitShiftingQuantization(vector<float>& data, double sigma) {
 
 
 // Function to apply wavelet compression with bit-shifting quantization
-void waveletTransform(vector<uint8_t>& buffer, uint32_t width, uint32_t height, double sigma, int bitShiftAmount) {
+void waveletTransform(vector<uint8_t>& buffer, uint32_t& width, uint32_t& height, double sigma, int bitShiftAmount) {
+    // Calculate the padded width and height to be a multiple of 4
+    uint32_t paddedWidth = (width + 3) / 4 * 4;  // Round up to next multiple of 4
+    uint32_t paddedHeight = (height + 3) / 4 * 4;  // Round up to next multiple of 4
+
+    // Resize the buffer to the padded size
+    buffer.resize(paddedWidth * paddedHeight);
+
+    // Optionally, fill the padding with zeros
+    fill(buffer.begin() + width * height, buffer.end(), 0);  // Padding with zero
+    
+    //Create temp buffer
     vector<double> tempBuffer(width * height);
 
     // Convert the uint8_t buffer to double for the wavelet transform
