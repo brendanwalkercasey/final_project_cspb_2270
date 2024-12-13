@@ -9,16 +9,13 @@ In simple terms, it’s akin to applying a filter to the image at different scal
 
 This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an image into frequency components, bit-shifting quantization: to quantize large values, while smaller coefficients are thresholded out with a sigma value, an inverse wavelet transform: to reconstruct the image from its compressed components, and built-in methods (from libTIFF library) to encode the image after quantization (with Limpel-Ziv-Welch, or LZW Compression).  
 
-
-## Details:
-
-Data Structures/Techniques Implemented:
+## Data Structures/Techniques Implemented:
 
     - Vectors (main base structure for storing image data, in the form of 1-D and 2-D arrays, typically with 8-bit, 16-bit, unsigned integers, or float types)
 
     - Buffers (temporary structures used during 2D Daubechies tranform to store intermediate results)
 
-    - Pointers (namely pointers to TIFF objects, to interact with the libTIFF library in a memory efficent manner)
+    - Pointers (namely unique pointers to TIFF objects, to interact with the libTIFF library in a memory efficent and memory safe manner)
 
     - Standard Library Algorithms (standard built-in methods to better organize code, and save time e.g. min_element and max_element for finding min/max values)
 
@@ -26,21 +23,45 @@ Data Structures/Techniques Implemented:
 
 
 
-Variables:
+## Variables:
 
-    Wavelet Decomposition with Daubechies-4 (using low/high pass filters):
-    
-        The Daubechies-4 filter is used for the 2D wavelet transform. The decomposition into sub-bands happens in two steps: applying the wavelet transform to the rows and then to the columns:
+    Wavelet Decomposition (low/high pass filters): The Daubechies-4 filter is used for the 2D wavelet transform. The decomposition into sub-bands happens in two steps: applying the wavelet transform to the rows and then to the columns:
 
-        Low-pass filter (h0, h1, h2, h3)
-        high-pass filter (g0, g1, g2, g3)
+        - Low-pass filter (h0, h1, h2, h3)
+        - High-pass filter (g0, g1, g2, g3)
+        - Inverse filter parmeters (low) (ih0, ih1, ih2, ih3) 
+        - Inverse filter parmeters (high) (ig0, ig1, ig2, ig3)
+
+    These are the inverse Daubechies-4 wavelet transform coefficients (used for reconstructing the image after compression).
         
-        For each row, the daubechies1D function is called, which applies the Daubechies-4 filter (low-pass and high-pass) to the data. After processing, the data is split into two parts: 1) low frequencies and 2) high frequencies.
+        - For each row, the daubechies1D function is called, which applies the Daubechies-4 filter (low-pass and high-pass) to the data. After processing, the data is split into two parts: 1) low frequencies and 2) high frequencies.
         The same process happens for every column in the daubechies2D function, further splitting the image into frequency bands.
 
-    Saving Daubechies-4 to separate files: 
+    Input Parameters:
+        - inputFile: string representing the path to the input TIFF file to be read ("cameraman.tif").
+        - outputFile: string representing the path where the compressed image will be saved.
+        - outputReconstructedFile: string representing the path where the reconstructed image after applying the inverse wavelet transform will be saved.
+        - sigma: double representing the threshold for soft thresholding in the quantization step. This controls how aggressively small values in the transformed image are set to zero during quantization.
+        - bitShiftAmount: integer representing the amount of bit shifting to apply during quantization (e.g., shifting by 2 bits). This reduces the precision of the wavelet coefficients, simulating compression.
+    
+    Image and Buffer Information:
+        - width: uint32_t variable representing the width of the image (in pixels). This is determined by reading the image from the TIFF file.
+        - height: uint32_t variable representing the height of the image (in pixels). This is also determined by reading the image from the TIFF file.
+        - samples_per_pixel: uint16_t variable representing the number of color channels per pixel. For grayscale images, this is typically 1 (single channel).
+        - buffer: std::vector<uint8_t> (vector of unsigned 8-bit integers) used to store the pixel data read from the TIFF file or written to the TIFF file. This holds image data (grayscale) in a 1D array format after reading the TIFF file. During processing, it's resized and updated with  transformed, quantized, or reconstructed pixel values.
+    
+    Temporary Buffers and Containers:
+        - tempBuffer: vector<double> used as temporary buffer to hold the image data as double values during the wavelet transform and reconstruction processes. This allows for more precise computations before converting the data back to uint8_t for output.
 
-        Initialize minVal and maxVal: The main reason for using constants is for defining initial extremes for the minVal and maxVal variables. When starting with largest possible, and smallest possible float values, we ensure that every value in the collection will either be smaller than FLT_MAX (updating minVal) or larger than -FLT_MAX (updating maxVal).
+    Functions and Flow Control
+        - TIFF* tiff: pointer to a TIFF structure used in conjunction with the TIFFOpen and TIFFClose functions for reading and writing TIFF files. The std::unique_ptr ensures that the TIFF file is properly closed when it goes out of scope.
+        - temp: Used for daubechies1D() and inverseDaubechies1D() functions to store temporary transformed data during the forward and inverse Daubechies-4 transform steps.
+        - normalized: double used for normalizing the pixel values (for example, during the inverse wavelet transform and when preparing the buffer for output), ensuring they fit in the 0-255 range for proper display in an 8-bit grayscale image.
+
+
+    (Optional) Sub-Band Parameters: 
+
+        minVal and maxVal: The main reason for using constants is for defining initial extremes for the minVal and maxVal variables. When starting with largest possible, and smallest possible float values, we ensure that every value in the collection will either be smaller than FLT_MAX (updating minVal) or larger than -FLT_MAX (updating maxVal).
 
             - "minVal" = initialized to FLT_MAX, which is the largest possible value that can be represented by a float. Any number in the matrix will be smaller than this value, so minVal will be updated to the first value in the matrix. 
             - "maxVal" = initialized to -FLT_MAX, the smallest possible value. Any number in the matrix will be larger than this value, so maxVal will be updated to the first value in the matrix.
@@ -58,7 +79,7 @@ Variables:
 
 
 
-Functions:
+## Functions:
 
     readTiffImage():
         - Opens TIFF image file for reading and loads the image data into a buffer. It extracts key metadata such as the image width, height, and the number of samples per pixel (such as grayscale or color channels). After resizing the buffer to fit the image dimensions, it reads the image scanlines (rows of pixels) one by one and stores them in the buffer. If the file cannot be opened, an error message is displayed. Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
@@ -228,9 +249,21 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
 [TBD]
 
 ## Future Development
-My original plans: 
-    
-    -OpenCV versus LibTIFF Libraries: My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
+Ongoing Issues:
+    1) Intermittent Data Loss in Output Files: The largest issue this code faces is an unknown, artifact that causes an occasional memory leak.  Admittedly this was difficult to diagnose, and given more time, I plan to find and fix this issue.  Essentially, about 1 and every 5 iterations of compiling the the code and running the "wavelet_compress" binary, it produces two (blank) grey or black imagery with one or two white bands (narrow and horizontal), instead of a succuessfully uncompressed image and a 4-band decomposition image.  I spent sevearal days debugging my code to add logic that would (hopefully) combat this issue.  Those efforts included:
+        - re-factoring my pointer structure (adding custom deleter fucntion for TIFF* to ensure proper cleanup, and using std::unique_ptr with custom deleter to automatically close the TIFF file)
+        - Ensuring image width and height are even for sub-band splitting (both in readTiffImage() and waveletTransform()), effectively creating a "padded" width/height by rounding up to next multiple of 4
+        - adjusting bit shift value in applyBitShiftingQuantization(), since higher bit shift values may lead to significant data loss.
+        - additional images were used (of varying sizes), but the issue persisted, leading me to beleive the bug still lies with how the code impliments the transform, resizing, or compression.
+        - explicitly resizing the buffer with padded width and height in my waveletTransform(), and padding image with zeros.
+        - Changing the "#define" to "typedef" when aliasing my uint data types (e.g. uint8_t as u8), initially beleiving it was an issue at the preprocessor level, affecting the entire translation unit (file).  Then removing (commenting out) typedef entirely, and falling back on using regular data types.  The initial thought behind aliasing my data types were simply to improve readability of my code.
+
+    Ultimatley, I beleive the issue is some type of memory leak, or incorrect/overcompression technique, which results in blank grey images periodically in my code's output (depending on the image input).  Perhaps the combination of bit shifting and wavelet compression requires special sigma values, or customized Lempel-Ziv-Weltch() function to be calculated depending on image input and its spatial patterns.  Currently, in applyBitShiftingQuantization(), I apply bit-shifting to compress the image. The current shift is 2 bits, which may lead to significant data loss. While I've adjusted this value based on the level of compression I may want to also consider other quantization techniques and/or use more sophisticated approaches.  
+
+    2) Improperly Sized Sub-Band Output Files:  While the above issue took ~90% of my time allocated towards debugging, I also experienced issues with the sub-band outputs incorrectly displaying individual decomposed sub-bands for Vertical, Horizontal, Diagonal, and Approximation components (i.e. sub-bands: HL, LH, HH, and LL).  This is an issue that I believe is an easier fix, however my priority was diagnosing an adding logic to debug the main file outputs (reconstructed image after transform and compression, and decomposed output image with all four sub-bands).
+
+Original plans: 
+    -OpenCV Library vs. LibTIFF Libraries: My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
 
                 - Package managers:
                     - Homebrew package manager (decided not to use, until I had more information about this issue - see https://saagarjha.com/blog/2019/04/26/thoughts-on-macos-package-managers/)
@@ -244,11 +277,11 @@ My original plans:
                 - Issues downloading from pre-compiled binaries:
                     - opencv pre-compiled binaries wouldn't link to my test_opencv.cpp code (test code for reading an image)
         
-        -Libraries Summary: Ultimately I chose the libTIFF library over OpenCV's library.  From my research, OpenCV is designed for programmers who dont want to hassle with the complexities of low-level file handling, and who are working with several image formats, and don’t need to focus exclusively on TIFF files. Using libTIFF turned out to be beneficial because it is designed for TIFFs specifically, and the API for libtiff is lower-level/ more complex than OpenCV’s. Code built on libTIFF source code needs to manage memory allocation, handle different compression types, and deal with the intricacies of the TIFF format manually.  This library provided a more in depth experience for a final project in Data Structures because my project requires fine-grained control over TIFF files, and specific compression methods.
+        -Libraries Summary: Logistically, for the scope of my project, it made more sense to use libTIFF library over OpenCV's library.  From my research, OpenCV is designed for software developers who dont want to hassle with the complexities of low-level file handling, or who are working with several image formats, and don’t need to focus exclusively on TIFF files. Using libTIFF turned out to be beneficial because it is designed for TIFFs specifically, and the API for libtiff is lower-level/ more complex than OpenCV’s. Code built on libTIFF source code needs to manage memory allocation, handle different compression types, and deal with the intricacies of the TIFF format manually.  This library provided a more in depth experience for a final project in Data Structures because my project requires fine-grained control over TIFF files, and specific compression methods.
 
     - Additional Data Structure(s): 
     
-        - Bit shifting for grayscale conversion: I wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this funcition.  I went down rabbit hole of ARGB vs RGBA methods, and how bit shifting and bit masking are applied in different contexts, especially when dealing with different pixel formats and how the individual color channels (Red, Green, Blue, Alpha) are stored in memory.  While it was benefical to learn about RGBA (0xAARRGGBB) (where the red channel is in bits 16–23, so you shift 16 bits to the right to extract it) as well as ARGB (0xRRGGBBAA) (where the red channel is in bits 24–31, so you shift 24 bits to the right to extract it), I determined this fell outside of main project scope, where this time could be better used to learn about wavelet transforms, and apply bitshifting towards compression techniques (the main focus of my project).  
+        - Bit Shifting for Grayscale Conversion: I wanted to use a method to convert both RGB images and grayscale images, and make use of bit shifting within this function.  I went down rabbit hole of ARGB vs RGBA methods, and how bit shifting and bit masking are applied in different contexts, especially when dealing with different pixel formats and how the individual color channels (Red, Green, Blue, Alpha) are stored in memory.  While it was benefical to learn about RGBA (0xAARRGGBB) (where the red channel is in bits 16–23, so you shift 16 bits to the right to extract it) as well as ARGB (0xRRGGBBAA) (where the red channel is in bits 24–31, so you shift 24 bits to the right to extract it), I determined this fell outside of main project scope, where this time could be better used to learn about wavelet transforms, and apply bitshifting towards compression techniques (the main focus of my project).  
 
         - SPIHT (Set Partitioning in Hierarchical Trees) is an algorithm specifically designed for wavelet-based image compression, and it's a popular choice because it achieves high compression ratios while preserving image quality. It operates by progressively encoding the most significant wavelet coefficients first, and is particularly well-suited for progressive compression, where an image can be progressively reconstructed as more bits are received.  This was an interesting direction, but was ultimatley abandoned due to time constraints.  However implementing SPIHT fully in C++ requires more attention to data structures like trees and priority queues, and efficient handling of the bitstream for encoding, which would be a great follow-on to this project.
     
@@ -260,7 +293,7 @@ My original plans:
 ## Notes:
 
     - Additional Compilation Errors:
-        - #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (so this is uneccessary)
+        - #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (rendering this uneccessary).
 
 ## Resources
 
