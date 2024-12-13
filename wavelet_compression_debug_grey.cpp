@@ -41,22 +41,25 @@ void readTiffImage(const char* filename, vector<uint8_t>& buffer, uint32_t& widt
             return;
     }
 
-    // Ensure width and height are even
+    // Ensure width and height are even for sub-band splitting (wavelet transform)
     if (width % 2 != 0) {
         width++;
-        buffer.resize(width * height);  // Resize the buffer to accommodate the new width
     }
     if (height % 2 != 0) {
         height++;
-        buffer.resize(width * height);  // Resize the buffer to accommodate the new height
     }
 
-        buffer.resize(width * height * samples_per_pixel);
+    // Calculate the padded width and height to be a multiple of 4
+    uint32_t paddedWidth = (width + 3) / 4 * 4;  // Round up to next multiple of 4
+    uint32_t paddedHeight = (height + 3) / 4 * 4;  // Round up to next multiple of 4
+
+
+    buffer.resize(width * height * samples_per_pixel);
         
-        for (uint32_t row = 0; row < height; row++) {
-            TIFFReadScanline(tiff.get(), &buffer[row * width * samples_per_pixel], row);
-        }
+    for (uint32_t row = 0; row < height; row++) {
+        TIFFReadScanline(tiff.get(), &buffer[row * width * samples_per_pixel], row);
     }
+}
 
 // Daubechies-4 low-pass and high-pass filter coefficients
 const float h0 = (1 + sqrt(3)) / (4 * sqrt(2));
@@ -384,8 +387,8 @@ int main() {
     
     uint32_t width, height = 0; // directly assign, to avoid potential memory errors
     uint16_t samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)
-    double sigma = 99;  // Thresholding value for quantization
-    int bitShiftAmount = 2;  // Example: shift by 2 bits (divide by 8)
+    double sigma = 42;  // Thresholding value for quantization
+    int bitShiftAmount = 1;  // Example: shift by 2 bits (divide by 8)
 
     // Step 1: Read the TIFF image into a buffer
     vector<uint8_t> buffer;
