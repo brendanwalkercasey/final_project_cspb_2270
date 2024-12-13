@@ -117,7 +117,7 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
     Lempel-Ziv-Weltch() (built-in algorithm for lossless tranforms):
         - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
 
-Steps:
+## Steps:
 
     1) Read the TIFF Image into a Buffer:
 
@@ -262,7 +262,7 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
 
     2) Improperly Sized Sub-Band Output Files:  While the above issue took ~90% of my time allocated towards debugging, I also experienced issues with the sub-band outputs incorrectly displaying individual decomposed sub-bands for Vertical, Horizontal, Diagonal, and Approximation components (i.e. sub-bands: HL, LH, HH, and LL).  This is an issue that I believe is an easier fix, however my priority was diagnosing an adding logic to debug the main file outputs (reconstructed image after transform and compression, and decomposed output image with all four sub-bands).
 
-Original plans: 
+## Original plans: 
     - OpenCV Library vs. LibTIFF Libraries: My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
 
                 - Package managers:
