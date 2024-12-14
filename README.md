@@ -2,14 +2,14 @@
 Final Project from CU Boulder's Data Structures 2270, under Applied Computer Science Bachelors Program.
 
 
-## Overview:
+## Overview
 Wavelet compression is a popular method for image compression, which leverages wavelet transforms to represent an image in a more efficient way, typically achieving high compression ratios with minimal loss of quality. The general idea is to decompose the image into a set of wavelet coefficients that can be quantized and encoded more effectively than the original pixel values.  The wavelet transform is a mathematical tool that decomposes an image into different frequency components at multiple scales. These components capture both the low-frequency information (which contains the smooth, overall features of the image) and high-frequency details (which capture sharp edges and fine textures).
 
 In simple terms, it’s akin to applying a filter to the image at different scales, allowing you to see both coarse and fine details in the image. By representing the image in terms of wavelet coefficients, we can selectively retain the most significant information while discarding less important data.
 
 This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an image into frequency components, bit-shifting quantization: to quantize large values, while smaller coefficients are thresholded out with a sigma value, an inverse wavelet transform: to reconstruct the image from its compressed components, and built-in methods (from libTIFF library) to encode the image after quantization (with Limpel-Ziv-Welch, or LZW Compression).  
 
-## Data Structures/Techniques Implemented:
+## Data Structures/Techniques Implemented
 
     - Vectors (main base structure for storing image data, in the form of 1-D and 2-D arrays, typically with 8-bit, 16-bit, unsigned integers, or float types)
 
@@ -23,7 +23,7 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
 
 
 
-## Variables:
+## Variables
 
     Wavelet Decomposition (low/high pass filters): The Daubechies-4 filter is used for the 2D wavelet transform. The decomposition into sub-bands happens in two steps: applying the wavelet transform to the rows and then to the columns:
 
@@ -79,7 +79,7 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
 
 
 
-## Functions:
+## Functions
 
     readTiffImage():
         - Opens TIFF image file for reading and loads the image data into a buffer. It extracts key metadata such as the image width, height, and the number of samples per pixel (such as grayscale or color channels). After resizing the buffer to fit the image dimensions, it reads the image scanlines (rows of pixels) one by one and stores them in the buffer. If the file cannot be opened, an error message is displayed. Values are unsigned 8-bit integers from grayscale images (0-255).  Since my project focuses on implimenting my own image compression, encoding and decoding, this part of the code uses built-in functions from the libTIFF library (https://libtiff.gitlab.io/libtiff/) to open, and read image width, height, and pixel samples (samples per pixel).  
@@ -117,7 +117,7 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
     Lempel-Ziv-Weltch() (built-in algorithm for lossless tranforms):
         - Used in conjunction with other built-in read/write functions defined in the libTIFF library.  Essentially, after applying the wavelet transform and quantization, the resulting image still contains a lot of data. Even though the image is compressed by reducing the precision of the wavelet coefficients, there's still potential to make the file smaller.
 
-## Steps:
+## Algorithm Steps
 
     1) Read the TIFF Image into a Buffer:
 
@@ -176,23 +176,21 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
 
 
     
-## How to run code:
+## How to Run Code
 
-    required installations:
+    Required Installations:
         - libTIFF library (https://libtiff.gitlab.io/libtiff/)
         - GNU Compiler Collection (https://gcc.gnu.org/)
-
-    - My code can be compiled and run as follows:
         
-        Compile Command (with flags):
+    Compile Command (with flags):
 
-            g++ -std=c++17 -o wavelet_compress wavelet_compression.cpp -ltiff
+        g++ -std=c++17 -o wavelet_compress wavelet_compression.cpp -ltiff
 
-        Run Executable:
+    Run Executable:
 
-            ./wavelet_compress
+        ./wavelet_compress
 
-## Write up:
+## Write up
 
 Description:
 
@@ -219,7 +217,7 @@ Description:
         - Reconstruction: inverseWaveletTransform() function inversely transforms the image, reconstructing it from the quantized coefficients. This step involves reversing the wavelet transform.  After applying the inverse transform, the image is reconstructed and written to a new TIFF file.  This technique results in some loss of image quality due to the quantization.
 
 
-## Analysis:
+## Analysis
 
 Bit Shift Values: The bitShiftAmount is used for applying bit-shifting quantization, which reduces the precision of image data by right-shifting the pixel values. This shift effectively narrows the range of pixel values, making it useful for compression by reducing the amount of data required to represent the image. 
 
@@ -273,7 +271,7 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
 
     2) Improperly Sized Sub-Band Output Files:  While the above issue took ~90% of my time allocated towards debugging, I also experienced issues with the sub-band outputs incorrectly displaying individual decomposed sub-bands for Vertical, Horizontal, Diagonal, and Approximation components (i.e. sub-bands: HL, LH, HH, and LL).  This is an issue that I believe is an easier fix, however my priority was diagnosing an adding logic to debug the main file outputs (reconstructed image after transform and compression, and decomposed output image with all four sub-bands).
 
-## Original Plans: 
+## Original Plans
     - OpenCV Library vs. LibTIFF Libraries: My original plan was to use OpenCV for its ease of use (and use LibTIFF as a backup library).  However, the route I took to install openCV (both using package managers, and precompiled binaries for quick installs) required several dependencies:
 
                 - Package managers:
@@ -301,7 +299,7 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
         - In my proposal, I planned to compare a wavelet transform effect on medical imagery with landsat data (individual RGB bands for simplicity), however considering the scope of this project, I re-evaluated chose to focus on implimenting the compression algorithms (specifically learning the Daubechies-4 method, as proposed) to incorperate the necessary (and desired) data structures (e.g. bit-shifting, low-pass filters, re-constructing the image, etc.).  Therefore I decided to use a single TIFF image and break down its components into the frequencies of its pixel values, and illustrate directional sub-bands.  Additionally, if my objective were to analyze the content of the Landsat image (e.g., vegetation analysis, land use classification, etc.), it was important to consider the raw compression techniques (wavelet transform + SPIHT) might not be the best option unless I was focusing on preserving high-level features. Lossy compression with no additional refinemnt (e.g. atmospheric correction, etc.) can introduce artifacts, which could impact feature extraction accuracy.
 
 
-## Notes:
+## Additional Notes
 
     - Additional Compilation Errors:
         - #define M_PI 3.14159265358979323846 commented out because it caught its orginal definition when compiling (rendering this uneccessary).
@@ -317,7 +315,7 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
     - Texas A&M lecture: https://people.qatar.tamu.edu/tingwen.huang/math414/5.1.pdf
     - Open Source tiff files: https://people.math.sc.edu/Burkardt/data/tif/tif.html
 
-2. Daubechies Wavelets and Wavelet Transforms
+2. Daubechies Wavelets and Wavelet Transforms:
 
     - A Primer on Wavelets and Their Scientific Applications by James S. Walker (Portion of Book): https://books.google.com/books?id=F-9VGmsdbdYC&pg=PA29&source=gbs_toc_r&cad=2#v=onepage&q&f=false
     - http://bearcave.com/misl/misl_tech/wavelets/index.html
@@ -326,7 +324,7 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
     - http://bearcave.com/misl/misl_tech/wavelets/daubechies/daub.h
 
 
-3. Wavelet Compression Theory
+3. Wavelet Compression Theory:
 
     - https://kids.frontiersin.org/articles/10.3389/frym.2023.1200611
     - https://www.nytimes.com/2021/09/14/magazine/ingrid-daubechies.html
@@ -352,6 +350,6 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
     - https://stackoverflow.com/questions/60377598/change-rgb-to-grayscale-in-c (ended up ot using in final iteration, and just used grayscale images, but referenced for content and concepts for bitshifting)
     - https://it.nc.gov/documents/files/understanding-compression-geospatial-raster-imagery/open (source for idea to use Lempel-Ziv-Welsh (LZW) method)
 
-6. Visualization of Wavelet Transforms
+6. Visualization of Wavelet Transforms:
 
     - Matplotlib for Wavelets (https://www.mathworks.com/help/wavelet/gs/introduction-to-the-wavelet-families.html)
