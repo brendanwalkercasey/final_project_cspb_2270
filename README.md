@@ -247,7 +247,7 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
 
     - bitShiftAmount = 4, 5, or 6 (Heavy Compression; significantly reduced file size, where size reduction is more important than preserving image quality, and edges more pronounced in individual decomposed horizontal, vertical and diagonal components)
 
-![Image](outputs/wavewavelet_compress_shift6_sigm42_compressed.tif) (7KB)
+![Image](outputs/wavelet_compress_shift6_sigm42_compressed.tif) (7KB)
 
 ![Image](outputs/wavelet_compress_shift6_sigm42_reconstructed.tif) (18KB)
 
