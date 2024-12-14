@@ -340,8 +340,8 @@ void daubechies2DWithSubbands(vector<vector<float>>& image,
 int main() {
     // Input and output file paths
     const char* inputFile = "cameraman.tif";
-    const char* outputFile = "v12_shift2_sigma42_output_compressed.tif";
-    const char* outputReconstructedFile = "v12_shift2_sigma42_bitshift3_output_reconstructed.tif";
+    const char* outputFile = "wavelet_compress_shift2_sigm42_compressed.tif";
+    const char* outputReconstructedFile = "wavelet_compress_shift2_sigm42_reconstructed.tif";
     
     u32 width, height;
     u16 samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)

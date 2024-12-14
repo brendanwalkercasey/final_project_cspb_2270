@@ -6,6 +6,10 @@
 #include <algorithm>
 #include <cfloat>  // for FLT_MAX and -FLT_MAX
 
+//#define std::uint32_t u32; 
+//#define std::uint16_t u16;
+//#define std::uint8_t u8;
+
 // ******for brevity ********
 //typedef std::uint32_t u32; 
 //typedef std::uint16_t u16;
@@ -395,13 +399,13 @@ void daubechies2DWithSubbands(vector<vector<float>>& image,
 int main() {
     // Input and output file paths
     const char* inputFile = "cameraman.tif";
-    const char* outputFile = "v12_shift2_sigma12_output_compressed.tif";
-    const char* outputReconstructedFile = "v12_shift2_sigma12_output_reconstructed.tif";
+    const char* outputFile = "wavlet_compressed_debug_sigma42_compressed.tif";
+    const char* outputReconstructedFile = "wavlet_compressed_debug_sigma42_reconstructed.tif";
     
     uint32_t width, height = 0; // directly assign, to avoid potential memory errors
     uint16_t samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)
     double sigma = 42;  // Thresholding value for quantization
-    int bitShiftAmount = 1;  // Example: shift by 2 bits (divide by 8)
+    int bitShiftAmount = 2;  // Example: shift by 2 bits (divide by 8)
 
     // Step 1: Read the TIFF image into a buffer
     vector<uint8_t> buffer;

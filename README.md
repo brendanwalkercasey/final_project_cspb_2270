@@ -59,7 +59,7 @@ This project uses a Daubechies Wavlet (Daubechies-4): for decomposition of an im
         - normalized: double used for normalizing the pixel values (for example, during the inverse wavelet transform and when preparing the buffer for output), ensuring they fit in the 0-255 range for proper display in an 8-bit grayscale image.
 
 
-    (Optional) Sub-Band Parameters: 
+    Sub-Band Parameters: 
 
         minVal and maxVal: The main reason for using constants is for defining initial extremes for the minVal and maxVal variables. When starting with largest possible, and smallest possible float values, we ensure that every value in the collection will either be smaller than FLT_MAX (updating minVal) or larger than -FLT_MAX (updating maxVal).
 
@@ -221,8 +221,7 @@ Description:
 
 ## Analysis:
 
-Bit Shift Values:
-The bitShiftAmount is used for applying bit-shifting quantization, which reduces the precision of image data by right-shifting the pixel values. This shift effectively narrows the range of pixel values, making it useful for compression by reducing the amount of data required to represent the image. 
+Bit Shift Values: The bitShiftAmount is used for applying bit-shifting quantization, which reduces the precision of image data by right-shifting the pixel values. This shift effectively narrows the range of pixel values, making it useful for compression by reducing the amount of data required to represent the image. 
 
     - bitShiftAmount = 0: No bit shift. Values are kept in full precision, and therefore no quantization is applied (image data remains.
     - bitShiftAmount = 1: Divides each pixel value by 2, reducing the range of pixel values.
@@ -248,9 +247,11 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
     - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
 [TBD]
 
+As expected, the Daubechies Compression breaks down the image into "approximation" and "detail" coefficients (low and high-frequency components), which helps represent this image (cameraman.tif) more compactly by separating out important structures (like hard edges and textures of the man's sillouete, his tripod, camera, and background building features) from less important ones (like smooth regions of the sky, grass, and repeating patterns of vegetation).  While I experiemented with vastly different sigma values, this didnt seem to change the image reconstruction from one iteration to the next, and unexpectedly, sizes were virtually the same between significantly different sigma values (e.g. wavelet_compress_shift2_sigma3_reconstructed.tif and wavelet_compress_shift2_sigma99_reconstructed.tif were both 38KB).  This is likely due to improper implementation of my sigma value, or perhaps improper combination with other compression techniques used (combined with bitshifing and/or my implimentation of the Lempel-Ziv-Weltch() function).  However this implimentation was successful in de-noising the image from specific artifacts (e.g. removing the random white band artifact in the bottom half of the cameraman.tif, and reducing complexity of pixel values in the sky in the grass). 
+
 ## Future Development
     Ongoing Issues:
-    1) Intermittent Data Loss in Output Files: The largest issue this code faces is an unknown, artifact that causes an occasional memory leak.  Admittedly this was difficult to diagnose, and given more time, I plan to find and fix this issue.  Essentially, about 1 and every 5 iterations of compiling the the code and running the "wavelet_compress" binary, it produces two (blank) grey or black imagery with one or two white bands (narrow and horizontal), instead of a succuessfully uncompressed image and a 4-band decomposition image.  I spent sevearal days debugging my code to add logic that would (hopefully) combat this issue.  Those efforts included:
+    1) Intermittent Data Loss in Output Files: The largest issue this code faces is an unknown, artifact that causes an occasional memory leak.  Admittedly this was difficult to diagnose, and given more time, I plan to find and fix this issue.  Essentially, about 1 and every 5 iterations of compiling the the code and running the "wavelet_compress" binary, it produces two (blank) grey or black imagery with one or two white bands (narrow and horizontal), instead of a succuessfully uncompressed image and a 4-band decomposition image.  I spent sevearal days debugging my code to add logic that would (hopefully) combat this issue.  These efforts included:
             - re-factoring my pointer structure (adding custom deleter fucntion for TIFF* to ensure proper cleanup, and using std::unique_ptr with custom deleter to automatically close the TIFF file)
             - Ensuring image width and height are even for sub-band splitting (both in readTiffImage() and waveletTransform()), effectively creating a "padded" width/height by rounding up to next multiple of 4
             - adjusting bit shift value in applyBitShiftingQuantization(), since higher bit shift values may lead to significant data loss.
@@ -258,7 +259,7 @@ As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compr
             - explicitly resizing the buffer with padded width and height in my waveletTransform(), and padding image with zeros.
             - Changing the "#define" to "typedef" when aliasing my uint data types (e.g. uint8_t as u8), initially beleiving it was an issue at the preprocessor level, affecting the entire translation unit (file).  Then removing (commenting out) typedef entirely, and falling back on using regular data types.  The initial thought behind aliasing my data types were simply to improve readability of my code.
 
-        Ultimatley, I beleive the issue is some type of memory leak, or incorrect/overcompression technique, which results in blank grey images periodically in my code's output (depending on the image input).  Perhaps the combination of bit shifting and wavelet compression requires special sigma values, or customized Lempel-Ziv-Weltch() function to be calculated depending on image input and its spatial patterns.  Currently, in applyBitShiftingQuantization(), I apply bit-shifting to compress the image. The current shift is 2 bits, which may lead to significant data loss. While I've adjusted this value based on the level of compression I may want to also consider other quantization techniques and/or use more sophisticated approaches.  
+        Ultimatley, I beleive the issue is some type of memory leak, or incorrect/overcompression technique, which results in blank grey images periodically in my code's output (depending on the image input).  Perhaps the combination of bit shifting and wavelet compression requires special sigma values, or customized Lempel-Ziv-Weltch() function to be calculated depending on image input and its spatial patterns.  Currently, in applyBitShiftingQuantization(), I apply bit-shifting to compress the image. The current shift is 2 bits, which may lead to significant data loss. While I've adjusted this value based on the level of compression I may want to also consider other quantization techniques and/or use more sophisticated approaches.  All efforts above are documented in "wavelet_compression_debug_grey.cpp".
 
     2) Improperly Sized Sub-Band Output Files:  While the above issue took ~90% of my time allocated towards debugging, I also experienced issues with the sub-band outputs incorrectly displaying individual decomposed sub-bands for Vertical, Horizontal, Diagonal, and Approximation components (i.e. sub-bands: HL, LH, HH, and LL).  This is an issue that I believe is an easier fix, however my priority was diagnosing an adding logic to debug the main file outputs (reconstructed image after transform and compression, and decomposed output image with all four sub-bands).
 
