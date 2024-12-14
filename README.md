@@ -223,31 +223,36 @@ Description:
 
 Bit Shift Values: The bitShiftAmount is used for applying bit-shifting quantization, which reduces the precision of image data by right-shifting the pixel values. This shift effectively narrows the range of pixel values, making it useful for compression by reducing the amount of data required to represent the image. 
 
-    - bitShiftAmount = 0: No bit shift. Values are kept in full precision, and therefore no quantization is applied (image data remains.
-    - bitShiftAmount = 1: Divides each pixel value by 2, reducing the range of pixel values.
-    - bitShiftAmount = 2: Divides each pixel value by 4.
-    - bitShiftAmount = 3: Divides each pixel value by 8, results in more aggressive compression.
-    - bitShiftAmount = 4: Divides each pixel value by 16.
+    - bitShiftAmount = 0: No bit shift. (values are kept in full precision, and therefore no quantization is applied, and image data remains.)
+    - bitShiftAmount = 1: Divides each pixel value by 2.
+    - bitShiftAmount = 2: Divides each pixel value by 4. (reduces the range of pixel values.)
+    - bitShiftAmount = 3: Divides each pixel value by 8.
+    - bitShiftAmount = 4: Divides each pixel value by 16. (results in more aggressive compression.)
     - bitShiftAmount = 5: Divides each pixel value by 32.
+    - bitShiftAmount = 6: Divides each pixel value by 64. (greatly reduces image quality and size, but preserves most basic features.)
 
-As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compression, but at the cost of reduced image quality due to more aggressive quantization. This can lead to a noticeable loss of detail, particularly in areas with fine textures or smooth gradients. On the other hand, lower bitShiftAmount values (e.g., 1 or 2) preserve more detail but achieve less compression. While this may not significantly reduce data storage, it still offers some level of quantization to decrease file size.  This can be demonstrated below:
+As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compression, but at the cost of reduced image quality due to more aggressive quantization. This can lead to a noticeable loss of detail, particularly in areas with fine textures or smooth gradients. On the other hand, lower bitShiftAmount values (e.g., 1 or 2) preserve more detail but achieve less compression. While this may not significantly reduce data storage, it still offers some level of quantization to decrease file size.  The most interesting was the visual result of each of the decomposed sections (i.e. sub-bands: HL, LH, HH, and LL) of the wavelet_compress_shift6_sigm42_reconstructed.tif, when increasing the bit shifting value from 4 to 6.  The decomposed sections of horizontal, vertical and diagonal components show stronger edges than previously demonstrated (i.e. stronger edges when shifting bits by 6 as opposed to 4 or 2).  Additionally, there is a significant amount detail still preserved when compiling and creating the wavelet_compress_shift6_sigm42_reconstructed.tif.  This can be demonstrated below:
 
     - bitShiftAmount = 1, or 2 (Light Compression: preserve image quality while still reducing the file size, useful for noise reduction)
 
-![Image](images/v11_shift2_output_compressed.tif)
+![Image](outputs/wavelet_compress_shift2_sigm42_compressed.tif) (29KB)
 
-![Image](images/v11_shift2_output_recosntructed.tif)
+![Image](outputs/wavelet_compress_shift2_sigm42_reconstructed.tif) (38KB)
 
     - bitShiftAmount = 3 (Moderate Compression: balances file size and image quality)
 
-![Image](images/v11_shift3_output_compressed.tif)
+![Image](outputs/wavelet_compress_shift4_sigm42_compressed.tif) (15KB)
 
-![Image](images/v11_shift3_output_recosntructed.tif)
+![Image](outputs/wavelet_compress_shift4_sigm42_reconstructed.tif) (31KB)
 
-    - bitShiftAmount = 4, or 5 (Heavy Compression; reduce file size, more important than preserving image quality)
-[TBD]
+    - bitShiftAmount = 4, 5, or 6 (Heavy Compression; significantly reduced file size, where size reduction is more important than preserving image quality, and edges more pronounced in individual decomposed horizontal, vertical and diagonal components)
 
-As expected, the Daubechies Compression breaks down the image into "approximation" and "detail" coefficients (low and high-frequency components), which helps represent this image (cameraman.tif) more compactly by separating out important structures (like hard edges and textures of the man's sillouete, his tripod, camera, and background building features) from less important ones (like smooth regions of the sky, grass, and repeating patterns of vegetation).  While I experiemented with vastly different sigma values, this didnt seem to change the image reconstruction from one iteration to the next, and unexpectedly, sizes were virtually the same between significantly different sigma values (e.g. wavelet_compress_shift2_sigma3_reconstructed.tif and wavelet_compress_shift2_sigma99_reconstructed.tif were both 38KB).  This is likely due to improper implementation of my sigma value, or perhaps improper combination with other compression techniques used (combined with bitshifing and/or my implimentation of the Lempel-Ziv-Weltch() function).  However this implimentation was successful in de-noising the image from specific artifacts (e.g. removing the random white band artifact in the bottom half of the cameraman.tif, and reducing complexity of pixel values in the sky in the grass). 
+![Image](outputs/wavewavelet_compress_shift6_sigm42_compressed.tif) (7KB)
+
+![Image](outputs/wavelet_compress_shift6_sigm42_reconstructed.tif) (18KB)
+
+
+Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the image into "approximation" and "detail" coefficients (low and high-frequency components), which helps represent the image (e.g. cameraman.tif) more compactly by separating out important structures (like hard edges and textures of the man's sillouete, his tripod, camera, and background building features) from less important ones (like smooth regions of the sky, grass, and repeating patterns of vegetation).  While I experiemented with vastly different sigma values, this didnt seem to change the image reconstruction from one iteration to the next, and unexpectedly, sizes were virtually the same between significantly different sigma values (e.g. wavelet_compress_shift2_sigma3_reconstructed.tif and wavelet_compress_shift2_sigma99_reconstructed.tif were both 38KB).  This is likely due to improper implementation of my sigma value, or perhaps improper combination with other compression techniques used (combined with bitshifing and/or my implimentation of the Lempel-Ziv-Weltch() function).  However this implimentation was successful in de-noising the image from specific artifacts (e.g. removing the random white band artifact in the bottom half of the cameraman.tif, and reducing complexity of pixel values in the sky in the grass). 
 
 ## Future Development
     Ongoing Issues:

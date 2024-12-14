@@ -97,7 +97,7 @@ void applyBitShiftingQuantization(vector<float>& data, double sigma) {
             value = 0;
         } else {
             // Apply bit-shifting by first converting to integer, shifting, and then back to float
-            int quantizedValue = static_cast<int>(value) >> 2;  // just decided to shift by 2 bits (keep it simple)
+            int quantizedValue = static_cast<int>(value) >> 6;  // just decided to shift by 2 bits (keep it simple)
             value = static_cast<float>(quantizedValue);
         }
     }
@@ -340,13 +340,13 @@ void daubechies2DWithSubbands(vector<vector<float>>& image,
 int main() {
     // Input and output file paths
     const char* inputFile = "cameraman.tif";
-    const char* outputFile = "wavelet_compress_shift2_sigm42_compressed.tif";
-    const char* outputReconstructedFile = "wavelet_compress_shift2_sigm42_reconstructed.tif";
+    const char* outputFile = "wavelet_compress_shift6_sigm42_compressed.tif";
+    const char* outputReconstructedFile = "wavelet_compress_shift6_sigm42_reconstructed.tif";
     
     u32 width, height;
     u16 samples_per_pixel = 1;  // Assuming grayscale image (single sample per pixel)
     double sigma = 42;  // Thresholding value for quantization
-    int bitShiftAmount = 2;  // Example: shift by 2 bits (divide by 8)
+    int bitShiftAmount = 6;  // Example: shift by 2 bits (divide by 8)
 
     // Step 1: Read the TIFF image into a buffer
     vector<u8> buffer;
