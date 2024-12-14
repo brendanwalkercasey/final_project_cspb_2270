@@ -279,6 +279,7 @@ Daubechies-4 Algorithm: As expected, the Daubechies Compression breaks down the 
                     - Macports package manager (decided not to use - see above, requires a lot of manual configurations, which runned the risk of time spent learning macports vs data structures needed for my project)
 
                 - Examples of General Dependencies from downloading from source:
+                    - GLib (required pkg-config)
                     - pkg-config 
                         - when i ran pkg-config --modversion opencv4, my terminal returned zsh: command not found: pkg-config
                     - pkg-config required glib which depending on the version downloaded, could not run ./confgure, and instead required meson tool
