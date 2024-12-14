@@ -233,6 +233,11 @@ Bit Shift Values: The bitShiftAmount is used for applying bit-shifting quantizat
 
 As expected, higher bitShiftAmount values (e.g., 4 or 5) result in greater compression, but at the cost of reduced image quality due to more aggressive quantization. This can lead to a noticeable loss of detail, particularly in areas with fine textures or smooth gradients. On the other hand, lower bitShiftAmount values (e.g., 1 or 2) preserve more detail but achieve less compression. While this may not significantly reduce data storage, it still offers some level of quantization to decrease file size.  The most interesting was the visual result of each of the decomposed sections (i.e. sub-bands: HL, LH, HH, and LL) of the wavelet_compress_shift6_sigm42_reconstructed.tif, when increasing the bit shifting value from 4 to 6.  The decomposed sections of horizontal, vertical and diagonal components show stronger edges than previously demonstrated (i.e. stronger edges when shifting bits by 6 as opposed to 4 or 2).  Additionally, there is a significant amount detail still preserved when compiling and creating the wavelet_compress_shift6_sigm42_reconstructed.tif.  This can be demonstrated below:
 
+    - Original Image (cameraman.tif):
+
+![Image](images/cameraman.tif) (65KB)
+
+
     - bitShiftAmount = 1, or 2 (Light Compression: preserve image quality while still reducing the file size, useful for noise reduction)
 
 ![Image](outputs/wavelet_compress_shift2_sigm42_compressed.tif) (29KB)
